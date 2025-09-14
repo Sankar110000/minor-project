@@ -1,13 +1,44 @@
-import React from 'react'
-import { View, Text } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import React from "react";
+import { View, Text, Image, TextInput } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function profile() {
   return (
-    <SafeAreaView>
-        <Text className='text-white'>Profile</Text>
+    <SafeAreaView className="pt-10 px-5">
+      <Text className="text-black dark:text-white text-3xl font-semibold mb-10">
+        Profile
+      </Text>
+      <View className="border border-slate-400 rounded-lg overflow-hidden">
+        <View className='flex-row p-4'>
+          <Image
+            source={{
+              uri: "https://www.cartoonize.net/wp-content/uploads/2024/05/avatar-maker-photo-to-cartoon.png",
+            }}
+            style={{ height: 100, width: 100, borderRadius: 50, marginTop:10, borderWidth:1 }}
+          />
+          <View className='p-5'>
+            <Text className='text-xl font-semibold'>Id: 1123</Text>
+            <Text className='text-xl font-semibold'>Name: Teacher</Text>
+            <Text className='text-xl font-semibold'>Name: Teacher</Text>
+            <Text className='text-xl font-semibold'>Name: Teacher</Text>
+          </View>
+        </View>
+      </View>
+      <View className='px-6 py-4 bg-orange-400 mt-5 w-[150] rounded-md'>
+        <Text className='text-center text-lg'>Edit Details</Text>
+      </View>
+      <View className='border border-slate-500 p-4 flex-col gap-3'>
+        <Text className='absolute right-2 top-2 text-2xl'>X</Text>
+        <View>
+          <Text nativeID="labelUsername" className='mb-1 ms-1 text-lg'>Username</Text>
+          <TextInput placeholder="Edit ur name" className='border border-black rounded-lg p-3 text-xl' aria-labelledby="labelUsername"/>
+        </View>
+        <View className='px-6 py-2 bg-orange-400 w-[70] rounded-md flex-row justify-end relative'>
+        <Text className='text-center text-lg'>Edit</Text>
+      </View>
+      </View>
     </SafeAreaView>
-  )
+  );
 }
 
-export default profile
+export default profile;

@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 function generate_qr() {
   return (
     <SafeAreaView>
-        <Text className='text-white'>Qr code</Text>
+        <Text className='text-black dark:text-white'>Qr code</Text>
     </SafeAreaView>
   )
 }
