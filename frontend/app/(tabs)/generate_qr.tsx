@@ -1,12 +1,24 @@
+import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
-import { Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { CameraView} from "expo-camera"
+import { Overlay } from './Overlay'
 
-function generate_qr() {
+
+const generate_qr = () => {
+  
   return (
-    <SafeAreaView>
-        <Text className='text-black dark:text-white'>Qr code</Text>
-    </SafeAreaView>
+         <View style={{flex: 1}}>
+          <CameraView 
+          style={StyleSheet.absoluteFillObject} 
+          facing='back'
+          onBarcodeScanned={({data})=>{
+            setTimeout(()=>{
+              console.log(data)
+            },5000)
+          }}
+          />
+        <Overlay/>
+         </View>
   )
 }
 
