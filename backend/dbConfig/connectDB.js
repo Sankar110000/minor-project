@@ -5,7 +5,7 @@ const DB_NAME = "attendance_system"
 
 async function DBconnect(){
     try {
-        const connection = await mongoose.connect(`${DB_URL}/${DB_NAME}`)
+        const connection = await mongoose.connect(`${DB_URL}${DB_NAME}`)
         console.log(`Connection successfull , Host: ${connection.connection.host}`)
     } catch (error) {
         console.log(error)
