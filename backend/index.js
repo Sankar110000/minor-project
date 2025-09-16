@@ -1,8 +1,18 @@
-const express = require('express')
-const app = express();
+const dotenv = require('dotenv');
+dotenv.config({
+    path: "./.env"
+})
+const app = require("./app.js")
+const DBconnect = require('./dbConfig/connectDB');
 
-const port = 8000
+const port = process.env.PORT || 8080
 
-app.listen(port, () => {
-    console.log(`App is listening on port ${port} `)
+DBconnect()
+.then(() => {
+    app.listen(port, () => {
+        console.log(`App is listening on port ${port}`)
+    })
+})
+.catch(err => {
+    console.log("Error while starting the app",err)
 })
