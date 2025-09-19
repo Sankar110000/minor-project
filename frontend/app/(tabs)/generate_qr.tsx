@@ -17,7 +17,7 @@ const generate_qr = () => {
             },5000)
           }}
           />
-        <Overlay/>
+          <Overlay/>
          </View>
   )
 }
