@@ -1,15 +1,51 @@
 import TouchableBtn from "@/components/TouchableBtn";
-import React from "react";
-import { View, Text, Image, TextInput } from "react-native";
+import { Entypo } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { View, Text, Image, TextInput, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 function profile() {
+
+  const [menuVisible,setMenuVisible]=useState(false)
   const handleClick=()=>{}
+
+  const handleLogout= async ()=>{
+      try {
+   const token =  await AsyncStorage.removeItem("token"); // removes only "token"
+    const role = await AsyncStorage.removeItem("role"); // removes only "token"
+   /*  console.log(token);
+    console.log(role); */
+    
+    Alert.alert("Token cleared");
+    setMenuVisible(false)
+    router.push("/(auth)/login")
+  } catch (error) {
+    console.error("Error clearing token", error);
+  }
+  }
+
   return (
     <SafeAreaView className="pt-10 px-5">
-      <Text className="text-black dark:text-white text-3xl font-semibold mb-10">
-        Profile
-      </Text>
+      <View className="flex-row justify-between items-center mb-6">
+      <Text className="text-white text-3xl font-semibold">Profile</Text>
+
+      {/* 3-dot icon */}
+      <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+        <Entypo name="dots-three-vertical" size={24} color="white" />
+      </TouchableOpacity>
+
+      {/* Logout option (only visible when menuVisible=true) */}
+      {menuVisible && (
+        <TouchableOpacity
+          className="absolute right-5  bg-red-600 px-4 py-2 rounded-lg shadow"
+          onPress={handleLogout}
+        >
+          <Text className="text-white font-semibold">Logout</Text>
+        </TouchableOpacity>
+      )}
+    </View>
       <View className="border border-slate-400 rounded-lg overflow-hidden">
         <View className='flex-row p-4'>
         <View className="flex flex-row items-center justify-around w-full px-30">

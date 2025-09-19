@@ -1,0 +1,1 @@
+export const BASE_URL = "https://minor-project-backend-iceg.onrender.com"

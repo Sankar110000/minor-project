@@ -1,6 +1,7 @@
 import { Card } from '@/components/Card';
 import React from 'react';
-import { FlatList, View, Text, SafeAreaView } from 'react-native';
+import { FlatList, View, Text} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const data = [
   { id: '1', maamName: 'Mrs. Smith', subject: 'Math', time: '9:00 AM' },

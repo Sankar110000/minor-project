@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native'
 import React from 'react'
 import { CameraView} from "expo-camera"
-import { Overlay } from './Overlay'
+import { Overlay } from '../../components/Overlay'
 
 
 const generate_qr = () => {
