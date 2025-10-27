@@ -19,7 +19,7 @@ const data = [
 
 export default function App() {
   return (
-    <SafeAreaView className="flex-1  ">
+    <SafeAreaView className="flex-1 ">
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}

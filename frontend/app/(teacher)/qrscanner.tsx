@@ -1,12 +1,55 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
+import QRCode from "react-native-qrcode-svg";
 
-const qrscanner = () => {
+export default function RandomQRCode() {
+  const colorScheme = useColorScheme(); // detects system theme (dark/light)
+  const [qrValue, setQrValue] = useState(generateRandomValue());
+
+  // 🔹 Generate random QR value
+  function generateRandomValue() {
+    const timestamp = Date.now().toString(36);
+    const randomHex = Math.floor(Math.random() * 1e16).toString(16);
+    return `QR-${timestamp}-${randomHex}`;
+  }
+
+  const handleGenerate = () => {
+    setQrValue(generateRandomValue());
+  };
+
+  // 🔹 Dynamic colors based on theme
+  const isDark = colorScheme === "dark";
+  const bgColor = isDark ? "bg-gray-900" : "bg-gray-100";
+  const textColor = isDark ? "text-white" : "text-gray-800";
+  const cardColor = isDark ? "bg-gray-800" : "bg-white";
+  const qrBgColor = isDark ? "#111827" : "#ffffff"; // exact background for QRCode
+
   return (
-    <View>
-      <Text>qrscanner</Text>
-    </View>
-  )
-}
+    <View className={`flex-1 items-center justify-center ${bgColor}`}>
+      <Text className={`text-2xl font-bold mb-6 ${textColor}`}>
+        Random QR Code Generator
+      </Text>
 
-export default qrscanner
+      {/* QR Code Box */}
+      <View className={`${cardColor} p-5 rounded-2xl shadow-lg`}>
+        <QRCode value={qrValue} size={200} backgroundColor={qrBgColor} color={isDark ? "white" : "black"} />
+      </View>
+
+      {/* Generated value */}
+      <Text className={`mt-4 text-sm ${textColor}`}>{qrValue}</Text>
+
+      {/* Regenerate button */}
+      <TouchableOpacity
+        onPress={handleGenerate}
+        className="mt-6 bg-orange-600 px-6 py-3 rounded-xl"
+      >
+        <Text className="text-white font-semibold text-lg">Generate New QR</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}

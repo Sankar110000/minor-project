@@ -4,6 +4,7 @@ import {
   TextInput,
   Alert,
   ActivityIndicator,
+  useColorScheme,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,15 +13,14 @@ import { BASE_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import { moderateScale } from "react-native-size-matters";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router"; // ✅ useRouter hook
+import { useRouter } from "expo-router";
 
 const Login = () => {
   const router = useRouter();
-
+  const theme = useColorScheme(); // detect dark or light mode
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
 
   const onSubmit = async () => {
     if (!email || !password) {
@@ -38,74 +38,139 @@ const Login = () => {
       );
 
       if (response.data.success) {
-        // Save token
         await AsyncStorage.setItem("token", response.data?.token);
-        await AsyncStorage.setItem("role",response.data.user.role)
-       
-        
-        const role = await AsyncStorage.getItem("role")
-        // Reset form
+        await AsyncStorage.setItem("role", response.data?.user.role);
+        await AsyncStorage.setItem("user", JSON.stringify(response.data?.user));
+
+        const role = await AsyncStorage.getItem("role");
         setEmail("");
         setPassword("");
 
-        // ✅ Redirect to user/teacher dashboard (example: "/(user)")
-        role==="student"?router.push("/(user)"):router.push("/(teacher)")
+        role === "student"
+          ? router.push("/(user)")
+          : router.push("/(teacher)");
       } else {
         Alert.alert("Login failed", response.data.message || "Try again");
       }
-    } catch (error: any) {
-      Alert.alert("Login Error", error.response?.data?.message || "Something went wrong");
+    } catch (error) {
+      Alert.alert(
+        "Login Error",
+        "Something went wrong"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-      <View className="w-full bg-white/10 dark:bg-zinc-800/20 border border-white/20 rounded-2xl shadow-lg p-6">
-        <Text className="text-2xl font-bold mb-6 text-center dark:text-white">
-          Login
+    <SafeAreaView
+      className={`flex-1 px-6 justify-center ${
+        theme === "dark"
+          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+          : "bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100"
+      }`}
+    >
+      {/* Glass card */}
+      <View
+        className={`rounded-3xl border p-6 shadow-2xl backdrop-blur-md ${
+          theme === "dark"
+            ? "bg-white/10 border-white/20"
+            : "bg-white/60 border-gray-200"
+        }`}
+      >
+        <Text
+          className={`text-3xl font-bold text-center mb-8 tracking-wide ${
+            theme === "dark" ? "text-white" : "text-gray-900"
+          }`}
+        >
+          Welcome Back 👋
         </Text>
 
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#6b7280"
-          className="border border-gray-300 rounded px-3 py-2 mb-3 dark:border-gray-700 dark:text-white"
-        />
+        {/* Email input */}
+        <View className="mb-5">
+          <Text
+            className={`text-sm mb-2 font-medium ${
+              theme === "dark" ? "text-gray-200" : "text-gray-700"
+            }`}
+          >
+            Email
+          </Text>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor={theme === "dark" ? "#9ca3af" : "#6b7280"}
+            className={`border rounded-2xl px-4 py-3 ${
+              theme === "dark"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
+            }`}
+          />
+        </View>
 
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          placeholderTextColor="#6b7280"
-          className="border border-gray-300 rounded px-3 py-2 mb-3 dark:border-gray-700 dark:text-white"
-        />
+        {/* Password input */}
+        <View className="mb-6">
+          <Text
+            className={`text-sm mb-2 font-medium ${
+              theme === "dark" ? "text-gray-200" : "text-gray-700"
+            }`}
+          >
+            Password
+          </Text>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+            placeholderTextColor={theme === "dark" ? "#9ca3af" : "#6b7280"}
+            className={`border rounded-2xl px-4 py-3 ${
+              theme === "dark"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
+            }`}
+          />
+        </View>
 
+        {/* Button */}
         <TouchableBtn
           title={
             isLoading ? (
-              <>
-                <ActivityIndicator size={moderateScale(15)} color={"#fff"} /> Login...
-              </>
+              <View className="flex-row items-center justify-center gap-2">
+                <ActivityIndicator size={moderateScale(15)} color={"#fff"} />
+                <Text className="text-white font-semibold">Logging in...</Text>
+              </View>
             ) : (
               "Login"
             )
           }
-          textStyle={"text-white font-semibold "}
-          btnStyle={"bg-blue-600 rounded py-3 items-center justify-center mt-4"}
+          textStyle="text-white font-semibold text-lg"
+          btnStyle="bg-blue-600 rounded-2xl py-3 items-center justify-center shadow-lg"
           onPress={onSubmit}
         />
 
+        {/* Divider */}
+        <View className="flex-row items-center my-6">
+          <View className="flex-1 h-[1px] bg-gray-400/30 dark:bg-white/20" />
+          <Text
+            className={`text-sm mx-3 ${
+              theme === "dark" ? "text-white" : "text-gray-700"
+            }`}
+          >
+            or
+          </Text>
+          <View className="flex-1 h-[1px] bg-gray-400/30 dark:bg-white/20" />
+        </View>
+
+        {/* Signup link */}
         <Text
-          onPress={() => router.push("/(auth)")} // example register page
-          className="text-center text-blue-900 font-semibold text-xl mt-5"
+          onPress={() => router.push("/(auth)")}
+          className={`text-center font-semibold text-base underline ${
+            theme === "dark" ? "text-indigo-300" : "text-indigo-700"
+          }`}
         >
-          Create a new account
+          Create a New Account
         </Text>
       </View>
     </SafeAreaView>

@@ -1,22 +1,28 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  ActivityIndicator,
+  useColorScheme,
+  ScrollView,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { Picker } from "@react-native-picker/picker";
-
 import { router } from "expo-router";
 import { BASE_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import { moderateScale } from "react-native-size-matters";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 export default function RegisterScreen() {
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student");
-  const [isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const scheme = useColorScheme(); // Detect dark or light mode
 
   const onSubmit = async () => {
     if (!fullname || !email || !password) {
@@ -25,89 +31,140 @@ export default function RegisterScreen() {
     }
 
     try {
-      const response = await axios.post(`${BASE_URL}/api/user/register`, {
-        fullname,
-        email,
-        password,
-        role,
-      },{withCredentials:true});
+      setIsLoading(true);
+      const response = await axios.post(
+        `${BASE_URL}/api/user/register`,
+        { fullname, email, password, role },
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
-      
-        setFullname("")
-        setEmail("")
-        setPassword("")
-        setIsLoading(true)
-        // console.log(response.data);
-        Alert.alert(response.data.message)
-
-        await AsyncStorage.setItem("role",response.data.savedUser.role)
-
-        setTimeout(()=>router.push("/(auth)/login"),3000)
-        
+        setFullname("");
+        setEmail("");
+        setPassword("");
+        Alert.alert(response.data.message);
+        setTimeout(() => router.push("/(auth)/login"), 2500);
       } else {
         Alert.alert("Error", response.data.message || "Something went wrong");
       }
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Unable to register. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const isDark = scheme === "dark";
+  const bgGradient = isDark
+    ? "bg-zinc-900"
+    : "bg-gradient-to-br from-blue-100 to-purple-200";
+
+  const cardBg = isDark ? "bg-zinc-800/90 border-zinc-700" : "bg-white border-gray-200";
+  const textColor = isDark ? "text-white" : "text-gray-900";
+  const placeholderColor = isDark ? "#9ca3af" : "#6b7280";
+
   return (
-    <SafeAreaView className="flex-1 items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-      <View className="w-full  bg-white/10 dark:bg-zinc-800/20 border border-white/20 rounded-2xl shadow-lg p-6">
-        <Text className="text-2xl font-bold mb-6 text-center dark:text-white">
-          Register
-        </Text>
-
-        <TextInput
-          value={fullname}
-          onChangeText={setFullname}
-          placeholder="Fullname"
-          placeholderTextColor="#6b7280"
-          className="border border-gray-300 rounded px-3 py-2 mb-3 dark:border-gray-700 dark:text-white"
-        />
-
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor="#6b7280"
-          className="border border-gray-300 rounded px-3 py-2 mb-3 dark:border-gray-700 dark:text-white"
-        />
-
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          secureTextEntry
-          placeholderTextColor="#6b7280"
-          className="border border-gray-300 rounded px-3 py-2 mb-3 dark:border-gray-700 dark:text-white"
-        />
- <View className="border border-gray-300 dark:border-gray-700 rounded bg-transparent">
-      <Picker
-        selectedValue={role}
-        onValueChange={(value) => setRole(value)}
-        style={{
-          color: "white",
-          fontSize: 16,
-          paddingHorizontal: 2,
-          backgroundColor: "transparent",
+    <SafeAreaView className={`flex-1 ${bgGradient}`}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
         }}
-        dropdownIconColor="#d1d5db"
+        keyboardShouldPersistTaps="handled"
       >
-        <Picker.Item label="Student" value="student" />
-        <Picker.Item label="Teacher" value="teacher" />
-      </Picker>
-    </View>
+        <View className={`w-full rounded-2xl border p-6 shadow-lg ${cardBg}`}>
+          <Text
+            className={`text-3xl font-extrabold text-center mb-8 ${
+              isDark ? "text-blue-400" : "text-blue-700"
+            }`}
+          >
+            Create Account
+          </Text>
 
-        <TouchableBtn title={ isLoading?(<><ActivityIndicator size={moderateScale(15)} color={"#00A884"}/>Register...</>): "Register"}  textStyle={"text-white font-semibold"} btnStyle={"bg-blue-600 rounded py-3 items-center mt-4"}  onPress={onSubmit}/>
-         
-         <Text onPress={()=>router.push("/(auth)/login")} className=" text-center text-blue-900 font-semibold text-xl mt-5">If you already have an account</Text>
-      </View>
+          {/* Fullname Input */}
+          <TextInput
+            value={fullname}
+            onChangeText={setFullname}
+            placeholder="Full Name"
+            placeholderTextColor={placeholderColor}
+            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+            }`}
+          />
+
+          {/* Email Input */}
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Email Address"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor={placeholderColor}
+            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+            }`}
+          />
+
+          {/* Password Input */}
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry
+            placeholderTextColor={placeholderColor}
+            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+            }`}
+          />
+
+          {/* Role Picker */}
+          <View
+            className={`border rounded-xl mb-4 ${
+              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+            }`}
+          >
+            <Picker
+              selectedValue={role}
+              onValueChange={(value) => setRole(value)}
+              style={{
+                color: isDark ? "white" : "black",
+                fontSize: 16,
+              }}
+              dropdownIconColor={isDark ? "#9ca3af" : "#4b5563"}
+            >
+              <Picker.Item label="Student" value="student" />
+              <Picker.Item label="Teacher" value="teacher" />
+            </Picker>
+          </View>
+
+          {/* Register Button */}
+          <TouchableBtn
+            title={
+              isLoading ? (
+                <ActivityIndicator size={moderateScale(18)} color="#fff" />
+              ) : (
+                "Register"
+              )
+            }
+            textStyle="text-white text-lg font-semibold"
+            btnStyle="bg-blue-600 rounded-xl py-3 items-center mt-2"
+            onPress={onSubmit}
+          />
+
+          {/* Already have an account */}
+          <Text
+            onPress={() => router.push("/(auth)/login")}
+            className={`text-center mt-6 font-semibold ${
+              isDark ? "text-blue-400" : "text-blue-700"
+            }`}
+          >
+            Already have an account? Login
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
