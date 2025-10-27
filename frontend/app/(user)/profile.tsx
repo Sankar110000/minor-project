@@ -61,6 +61,7 @@ function profile() {
           },
         }
       );
+      console.log(res.data);
       setUser(res.data.data);
     } catch (error) {
       console.log(`Error in the axios: ${error}`);
@@ -114,10 +115,10 @@ function profile() {
             />
             <View className="flex gap-3">
               <Text className="text-black dark:text-white text-3xl">
-                {user.email}
+                {user?.email}
               </Text>
               <Text className="dark:text-gray-500 text-zinc-500 text-xl">
-                Role: {user.role}
+                Role: {user?.role}
               </Text>
             </View>
           </View>
