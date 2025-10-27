@@ -56,8 +56,8 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView className="flex-1 items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-      <View className="w-full  bg-white/10 dark:bg-zinc-800/20 border border-white/20 rounded-2xl shadow-lg p-6">
-        <Text className="text-2xl font-bold mb-6 text-center dark:text-white">
+      <View className="w-full  bg-white/10 dark:bg-zinc-800/20  p-6">
+        <Text className="text-3xl font-bold mb-10 text-center dark:text-white">
           Register
         </Text>
 
@@ -92,7 +92,7 @@ export default function RegisterScreen() {
         selectedValue={role}
         onValueChange={(value) => setRole(value)}
         style={{
-          color: "white",
+          color: "black",
           fontSize: 16,
           paddingHorizontal: 2,
           backgroundColor: "transparent",
