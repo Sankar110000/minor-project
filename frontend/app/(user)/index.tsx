@@ -2,6 +2,7 @@ import { Card } from '@/components/Card';
 import React from 'react';
 import { FlatList, View, Text} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
 
 const data = [
   { id: '1', maamName: 'Mrs. Smith', subject: 'Math', time: '9:00 AM' },
@@ -18,6 +19,20 @@ const data = [
 
 
 export default function App() {
+  async function getData() {
+    try {
+      const res = await axios.get('http://localhost:8000')
+      console.log("Index rendered")
+      console.log(res.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+  React.useEffect(() => {
+    getData()
+  }, [])
   return (
     <SafeAreaView className="flex-1 ">
       <FlatList
