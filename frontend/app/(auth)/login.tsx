@@ -1,30 +1,12 @@
-<<<<<<< HEAD
-import {
-  View,
-  Text,
-  TextInput,
-  Alert,
-  ActivityIndicator,
-  useColorScheme,
-} from "react-native";
-import React, { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-=======
->>>>>>> 85fab5ec15a0d30c7d01425c9cfe8a9290e3dfcd
 import { BASE_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-<<<<<<< HEAD
-import { useRouter } from "expo-router";
-=======
 import axios from "axios";
 import { useRouter } from "expo-router"; // ✅ useRouter hook
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, Text, TextInput, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { moderateScale } from "react-native-size-matters";
->>>>>>> 85fab5ec15a0d30c7d01425c9cfe8a9290e3dfcd
 
 const Login = () => {
   const router = useRouter();
@@ -50,25 +32,6 @@ const Login = () => {
 
       if (response.data.success) {
         await AsyncStorage.setItem("token", response.data?.token);
-<<<<<<< HEAD
-        await AsyncStorage.setItem("role", response.data?.user.role);
-        await AsyncStorage.setItem("user", JSON.stringify(response.data?.user));
-
-        const role = await AsyncStorage.getItem("role");
-        setEmail("");
-        setPassword("");
-
-        role === "student"
-          ? router.push("/(user)")
-          : router.push("/(teacher)");
-      } else {
-        Alert.alert("Login failed", response.data.message || "Try again");
-      }
-    } catch (error) {
-      Alert.alert(
-        "Login Error",
-        "Something went wrong"
-=======
         await AsyncStorage.setItem("role", response.data.user.role);
 
         const role = await AsyncStorage.getItem("role");
@@ -85,7 +48,6 @@ const Login = () => {
       Alert.alert(
         "Login Error",
         error.response?.data?.message || "Something went wrong"
->>>>>>> 85fab5ec15a0d30c7d01425c9cfe8a9290e3dfcd
       );
     } finally {
       setIsLoading(false);
@@ -105,7 +67,7 @@ const Login = () => {
         className={`rounded-3xl border p-6 shadow-2xl backdrop-blur-md ${
           theme === "dark"
             ? "bg-white/10 border-white/20"
-            : "bg-white/60 border-gray-200"
+            : "bg-white border-gray-200"
         }`}
       >
         <Text
@@ -119,7 +81,7 @@ const Login = () => {
         {/* Email input */}
         <View className="mb-5">
           <Text
-            className={`text-sm mb-2 font-medium ${
+            className={`text-sm mb-2 font-medium  ${
               theme === "dark" ? "text-gray-200" : "text-gray-700"
             }`}
           >
@@ -167,17 +129,10 @@ const Login = () => {
         <TouchableBtn
           title={
             isLoading ? (
-<<<<<<< HEAD
-              <View className="flex-row items-center justify-center gap-2">
-                <ActivityIndicator size={moderateScale(15)} color={"#fff"} />
-                <Text className="text-white font-semibold">Logging in...</Text>
-              </View>
-=======
               <>
                 <ActivityIndicator size={moderateScale(15)} color={"#fff"} />{" "}
                 Login...
               </>
->>>>>>> 85fab5ec15a0d30c7d01425c9cfe8a9290e3dfcd
             ) : (
               "Login"
             )

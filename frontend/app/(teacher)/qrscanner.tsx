@@ -32,7 +32,7 @@ export default function RandomQRCode() {
   return (
     <View className={`flex-1 items-center justify-center ${bgColor}`}>
       <Text className={`text-2xl font-bold mb-6 ${textColor}`}>
-        Random QR Code Generator
+        Scan the QR to mark attendance
       </Text>
 
       {/* QR Code Box */}
