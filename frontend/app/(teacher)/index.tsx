@@ -40,7 +40,7 @@ const Index = () => {
           </View>
 
           <Image
-            source={{ uri: "https://i.pravatar.cc/100" }}
+            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
             className="w-12 h-12 rounded-full border-2 border-orange-500"
           />
         </View>
