@@ -34,7 +34,7 @@ export default function App() {
     getData()
   }, [])
   return (
-    <SafeAreaView className="flex-1  ">
+    <SafeAreaView className="flex-1 ">
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
