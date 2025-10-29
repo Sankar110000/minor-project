@@ -1,15 +1,13 @@
+import { DEV_URL } from "@/components/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 export default function RandomQRCode() {
   const colorScheme = useColorScheme(); // detects system theme (dark/light)
-  const [qrValue, setQrValue] = useState(generateRandomValue());
+  const [qrValue, setQrValue] = useState(JSON.stringify({}));
 
   // 🔹 Generate random QR value
   function generateRandomValue() {
@@ -18,8 +16,21 @@ export default function RandomQRCode() {
     return `QR-${timestamp}-${randomHex}`;
   }
 
-  const handleGenerate = () => {
-    setQrValue(generateRandomValue());
+  const handleGenerate = async () => {
+    try {
+      const userString: string | null = await AsyncStorage.getItem("user");
+      const user = userString ? JSON.parse(userString) : null;
+      const res = await axios.post(`${DEV_URL}/api/class/create`, {
+        title: "Java",
+        classTeacher: user?._id,
+      });
+      console.log(res.data);
+      if (res.data.success) {
+        setQrValue(JSON.stringify(res.data.savedClass));
+      }
+    } catch (error) {
+      console.log("Error while generating QR : ", error);
+    }
   };
 
   // 🔹 Dynamic colors based on theme
@@ -37,7 +48,12 @@ export default function RandomQRCode() {
 
       {/* QR Code Box */}
       <View className={`${cardColor} p-5 rounded-2xl shadow-lg`}>
-        <QRCode value={qrValue} size={200} backgroundColor={qrBgColor} color={isDark ? "white" : "black"} />
+        <QRCode
+          value={qrValue}
+          size={200}
+          backgroundColor={qrBgColor}
+          color={isDark ? "white" : "black"}
+        />
       </View>
 
       {/* Generated value */}
@@ -48,7 +64,9 @@ export default function RandomQRCode() {
         onPress={handleGenerate}
         className="mt-6 bg-orange-600 px-6 py-3 rounded-xl"
       >
-        <Text className="text-white font-semibold text-lg">Generate New QR</Text>
+        <Text className="text-white font-semibold text-lg">
+          Generate New QR
+        </Text>
       </TouchableOpacity>
     </View>
   );
