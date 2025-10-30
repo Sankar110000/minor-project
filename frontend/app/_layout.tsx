@@ -13,6 +13,11 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ScreenCapture from "expo-screen-capture";
+import { Alert } from "react-native";
+
+
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +27,22 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+ useEffect(() => {
+    // ✅ Prevent screenshots & screen recording
+    ScreenCapture.preventScreenCaptureAsync();
+
+    // 🔄 Optional: detect screenshot event
+    const subscription = ScreenCapture.addScreenshotListener(() => {
+      Alert.alert("Screenshots are not allowed in this app!");
+    });
+
+    return () => {
+      subscription.remove();
+      ScreenCapture.allowScreenCaptureAsync();
+    };
+  }, []);
+
 
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
