@@ -61,7 +61,6 @@ function UserProfile() {
           },
         }
       );
-      console.log(res.data);
       setUser(res.data.data);
     } catch (error) {
       console.log(`Error in the axios: ${error}`);

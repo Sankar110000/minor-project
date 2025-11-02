@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/components/config";
+import { DEV_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -32,12 +32,13 @@ const Login = () => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `${BASE_URL}/api/user/login`,
+        `${DEV_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       );
 
       if (response.data.success) {
+        console.log(response.data);
         await AsyncStorage.setItem("token", response.data?.token);
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
         await AsyncStorage.setItem("role", response.data.user.role);
