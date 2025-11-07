@@ -1,16 +1,54 @@
-import { Text, View } from "react-native";
-import TouchableBtn from "./TouchableBtn";
+import { Text, View, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useColorScheme } from "react-native";
 
-export const Card = ({ maamName, subject, time }: any) => (
-  <View className="dark:bg-zinc-800 bg-white rounded-xl p-4 mb-3 shadow-md flex-row justify-between items-center px-7 mx-5 my-3">
-    <View>
-      <Text className="text-lg font-bold dark:text-gray-100">{maamName}</Text>
-      <Text className="text-base text-gray-600">{subject}</Text>
-      <Text className="text-sm text-gray-400">{time}</Text>
+export const Card = ({ subject, maamName, time, present, title }: any) => {
+  const theme = useColorScheme();
+  const isDark = theme === "dark";
+
+  // ✅ Apply same theme variables as Teacher Page UI
+  const cardBg = isDark ? "bg-white/10" : "bg-white";
+  const borderColor = isDark ? "border-white/20" : "border-gray-300";
+  const textMain = isDark ? "text-white" : "text-gray-900";
+  const textSub = isDark ? "text-gray-300" : "text-gray-600";
+
+  return (
+    <View
+      className={`
+        rounded-2xl p-5 mb-4 border mx-5 backdrop-blur-md
+        ${cardBg} ${borderColor}
+      `}
+      style={{ shadowOpacity: 0.1, shadowRadius: 6 }}
+    >
+      {/* Subject Row */}
+      <View className="flex-row items-center mb-2">
+        <Ionicons name="book-outline" size={26} color={isDark ? "#f97316" : "#f97316"} />
+        <Text className={`ml-3 text-xl font-medium ${textMain}`}>
+          {subject}
+        </Text>
+      </View>
+
+      {/* Teacher */}
+      <Text className={`${textSub} text-base`}>
+        👩‍🏫 Teacher: <Text className={`${textMain} font-medium`}>{maamName}</Text>
+      </Text>
+
+      {/* Time */}
+      <Text className={`${textSub} text-base mt-1`}>
+        ⏰ Time: <Text className={`${textMain} font-medium`}>{time}</Text>
+      </Text>
+
+      {/* Status Button */}
+      <TouchableOpacity
+        activeOpacity={0.85}
+        className={`mt-4 py-3 rounded-xl items-center
+          ${present ? "bg-green-500" : "bg-red-500"}
+        `}
+      >
+        <Text className="text-white font-medium text-base">
+          {title}
+        </Text>
+      </TouchableOpacity>
     </View>
-    <TouchableBtn
-      title={"Present"}
-      btnStyle={"bg-yellow-500 text-white px-5 py-2 rounded"}
-    />
-  </View>
-);
+  );
+};

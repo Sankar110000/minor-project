@@ -7,15 +7,28 @@ import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
-  Image,
+  View,
   Text,
   TextInput,
+  Image,
   TouchableOpacity,
-  View,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import { useColorScheme } from "react-native";
 
-function UserProfile() {
+export default function UserProfile() {
+  const scheme = useColorScheme();
+  const isDark = scheme === "dark";
+
+  const textColor = isDark ? "#fff" : "#1a1a1a";
+  const subTextColor = isDark ? "#b3b3b3" : "#4b5563";
+  const cardBg = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)";
+  const borderColor = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const iconColor = isDark ? "#fff" : "#000";
+
   const [menuVisible, setMenuVisible] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editedName, setEditedName] = useState("");
@@ -23,48 +36,28 @@ function UserProfile() {
 
   axios.defaults.withCredentials = true;
 
-  const handleClick = () => {
-    setShowForm(!showForm);
-  };
-
-  const handleInputChange = (e: any) => {
-    setEditedName(e.target.value);
-  };
+  const toggleMenu = () => setMenuVisible(!menuVisible);
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem("token"); // removes only "token"
-      await AsyncStorage.removeItem("role"); // removes only "token"
-
-      Alert.alert("Loggedout successfully");
+      await AsyncStorage.multiRemove(["token", "role"]);
+      Alert.alert("Logout Successful");
       setMenuVisible(false);
       router.push("/(auth)/login");
-    } catch (error) {
-      console.error("Error clearing token", error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   const getData = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const headers = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const res = await axios.post(
-        `${BASE_URL}/api/user/getUser`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(res.data);
+      const res = await axios.post(`${BASE_URL}/api/user/getUser`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setUser(res.data.data);
     } catch (error) {
-      console.log(`Error in the axios: ${error}`);
+      console.log("Error:", error);
     }
   };
 
@@ -73,94 +66,119 @@ function UserProfile() {
   }, []);
 
   return (
-    <SafeAreaView className="pt-10 px-5">
-      <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-black dark:text-white text-3xl font-semibold">
-          Profile
-        </Text>
+    <SafeAreaView className="flex-1">
+      <LinearGradient
+        colors={isDark ? ["#111827", "#111827"] : ["#ffffff", "#ffffff"]}
+        style={{ flex: 1 }}
+      >
 
-        {/* 3-dot icon */}
-        <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
-          <Entypo
-            name="dots-three-vertical"
-            size={24}
-            color="dark:white dark"
-          />
-        </TouchableOpacity>
+        {/* Header */}
+        <BlurView
+          intensity={90}
+          tint={isDark ? "dark" : "light"}
+          className="px-5 py-4 flex-row justify-between items-center border-b"
+          style={{ borderBottomColor: borderColor }}
+        >
+          <Text style={{ color: textColor }} className="text-2xl font-semibold">
+            Profile
+          </Text>
 
-        {/* Logout option (only visible when menuVisible=true) */}
-        {menuVisible && (
-          <TouchableOpacity
-            className="absolute right-10 bg-red-600 px-4 py-2 rounded-lg shadow"
-            onPress={handleLogout}
-          >
-            <Text className="text-white font-semibold">Logout</Text>
+          <TouchableOpacity  activeOpacity={0.9} onPress={toggleMenu}>
+            
+            <Entypo name="dots-three-vertical" size={24} color={iconColor} />
           </TouchableOpacity>
-        )}
-      </View>
-      <View className="border border-slate-400 rounded-lg overflow-hidden">
-        <View className="flex-row p-4">
-          <View className="flex flex-row items-center justify-around w-full px-30">
-            <Image
-              source={{
-                uri: "https://www.cartoonize.net/wp-content/uploads/2024/05/avatar-maker-photo-to-cartoon.png",
-              }}
-              style={{
-                height: 100,
-                width: 100,
-                borderRadius: 50,
-                marginTop: 10,
-                borderWidth: 1,
-              }}
-            />
-            <View className="flex gap-3">
-              <Text className="text-black dark:text-white text-3xl">
-                {user?.email}
-              </Text>
-              <Text className="dark:text-gray-500 text-zinc-500 text-xl">
-                Role: {user?.role}
-              </Text>
+
+          {menuVisible && (
+            <View
+              className="absolute top-14 right-4 rounded-xl shadow-md"
+              style={{ backgroundColor: cardBg, borderColor, borderWidth: 1 }}
+            >
+              <Pressable
+                className="px-5 py-3 bg-red-600 rounded"
+                onPress={handleLogout}
+              >
+                <Text className="text-white font-bold text-base">Logout</Text>
+              </Pressable>
             </View>
-          </View>
-        </View>
-      </View>
-      {/* <TouchableBtn
-        onPress={handleClick}
-        title={"Edit Details"}
-        btnStyle={"py-2 bg-orange-400 mt-5 w-[150] rounded-md"}
-        textStyle={"text-center text-lg"}
-      /> */}
-      {showForm ? (
-        <View className="border border-slate-500 p-4 flex-col gap-3">
-          <TouchableBtn
-            title={"X"}
-            className="absolute right-2 top-2 text-2xl p-2"
-            onPress={handleClick}
+          )}
+        </BlurView>
+
+        {/* Profile Section */}
+        <View className="items-center mt-10">
+          <Image
+            source={{
+              uri: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+            }}
+            className="w-32 h-32 rounded-full"
+            style={{ borderColor: borderColor, borderWidth: 3 }}
           />
-          <View>
-            <Text nativeID="labelUsername" className="mb-1 ms-1 text-lg">
-              Username
+
+          <Text style={{ color: textColor }} className="text-2xl font-bold mt-4">
+            {editedName || user.email.split("@")[0]}
+          </Text>
+        
+          <Text
+            className="text-base mt-1"
+            style={{ color: isDark ? "#F97316" : "#EA580C" }}
+          >
+            Role: {user.role}
+          </Text>
+          
+        </View>
+       
+ <View
+                      className="rounded-2xl p-4 mx-6 mt-5"
+                      style={{ backgroundColor: cardBg, borderColor: borderColor, borderWidth: 1 }}
+                    >
+                      <Text className="text-sm" style={{ color: subTextColor }}>
+                        {"email"}
+                      </Text>
+                      <Text className="text-lg font-semibold mt-1" style={{ color: textColor }}>
+                        {user.email}
+                      </Text>
+                    </View>
+        {/* Edit Button */}
+        <View className="mt-8 px-6">
+          <TouchableBtn
+            onPress={() => setShowForm(!showForm)}
+            title={showForm ? "Close" : "Edit Details"}
+            btnStyle="bg-orange-500 rounded-xl py-3"
+            textStyle="text-white text-lg font-semibold text-center"
+          />
+        </View>
+
+        {/* Edit Form */}
+        {showForm && (
+          <View
+            className="mt-6 mx-6 p-5 rounded-xl"
+            style={{ backgroundColor: cardBg, borderColor, borderWidth: 1 }}
+          >
+            <Text style={{ color: textColor }} className="font-semibold text-lg mb-2">
+              Update Username
             </Text>
+
             <TextInput
-              placeholder="Edit ur name"
-              className="border border-white rounded-lg p-3 text-xl text-white"
-              aria-labelledby="labelUsername"
               value={editedName}
-              onChange={handleInputChange}
+              onChangeText={setEditedName}
+              placeholder="Enter new name"
+              placeholderTextColor={subTextColor}
+              className="rounded-lg p-3 text-lg"
+              style={{
+                backgroundColor: isDark ? "#1f2937" : "#e5e7eb",
+                color: textColor,
+              }}
+            />
+
+            <TouchableBtn
+
+              onPress={() => Alert.alert("Updated Successfully")}
+              title="Save"
+              btnStyle="bg-orange-500 rounded-xl py-3 mt-4"
+              textStyle="text-white text-lg font-bold text-center"
             />
           </View>
-          <TouchableBtn
-            onPress={handleClick}
-            title={"Edit"}
-            btnStyle={
-              "px-6 py-2 bg-orange-400 w-[70] rounded-md flex-row justify-end relative"
-            }
-            textStyle={"text-center text-lg"}
-          />
-        </View>
-      ) : null}
+        )}
+      </LinearGradient>
     </SafeAreaView>
   );
 }
-
-export default UserProfile;

@@ -24,8 +24,7 @@ const TeacherProfile = () => {
   const cardBg = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
   const borderColor = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
   const iconColor = isDarkMode ? "#fff" : "#000";
-const [user, setUser] = useState(null);
-
+   const [user, setUser]:any = useState({});
  
   useEffect(() => {
     const fetchData = async () => {
@@ -36,8 +35,7 @@ const [user, setUser] = useState(null);
         if (userProfile) {
           const data = JSON.parse(userProfile);
           setUser(data);
-          // Optional: show alert with user info
-          Alert.alert("User Loaded", JSON.stringify(data, null, 2));
+          
         }
       } catch (error) {
         console.error("Failed to load user:", error);
@@ -65,7 +63,7 @@ const [user, setUser] = useState(null);
     <SafeAreaView className="flex-1">
       {/* Background Gradient */}
       <LinearGradient
-        colors={isDarkMode ? ["#111827","#111827","#111827"] : ["#fefefe", "#ffe7d6", "#ffd1a9"]}
+        colors={isDarkMode ? ["#111827","#111827","#111827"] : ["#ffffff", "#ffffff", "#ffffff"]}
         style={{ flex: 1 }}
       >
         {/* Header with Glass Effect */}
@@ -116,7 +114,7 @@ const [user, setUser] = useState(null);
             style={{ borderWidth: 4, borderColor: borderColor }}
           />
           <Text className="text-2xl font-semibold mt-4" style={{ color: textColor }}>
-            Mr. Rahul Sharma
+            Mr. {user?.fullname}
           </Text>
           <Text className="text-base mt-1" style={{ color: subTextColor }}>
             Physics Lecturer
@@ -128,7 +126,7 @@ const [user, setUser] = useState(null);
           {[
             { label: "Experience", value: "8 Years" },
             { label: "Subjects Taught", value: "Physics, Mathematics" },
-            { label: "Email", value: "narayan121321@gmail.com" },
+            { label: "Email", value: user.email },
             { label: "Contact Number", value: "+91 98765 43210" },
           ].map((item, index) => (
             <View

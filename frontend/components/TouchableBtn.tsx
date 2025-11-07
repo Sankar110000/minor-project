@@ -3,9 +3,11 @@ import React from 'react'
 
 const TouchableBtn = ({onPress ,textStyle,btnStyle,title}:any) => {
   return (
-    <TouchableOpacity className={btnStyle} onPress={onPress}>
+   <>
+    <TouchableOpacity activeOpacity={0.8} className={btnStyle} onPress={onPress}>
         <Text className={textStyle}>{title}</Text>
     </TouchableOpacity>
+   </>
   )
 }
 
