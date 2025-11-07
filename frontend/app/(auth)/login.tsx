@@ -36,12 +36,13 @@ const Login = () => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `${BASE_URL}/api/user/login`,
+        `${DEV_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       );
 
       if (response.data.success) {
+        console.log(response.data);
         await AsyncStorage.setItem("token", response.data?.token);
 
         await AsyncStorage.setItem("role", response.data?.user.role);
@@ -81,7 +82,7 @@ const Login = () => {
         className={`rounded-xl border p-6 shadow-2xl backdrop-blur-md ${
           theme === "dark"
             ? "bg-white/10 border-white/20"
-            : "bg-white/60 border-gray-200"
+            : "bg-white border-gray-200"
         }`}
       >
         <Text
@@ -95,7 +96,7 @@ const Login = () => {
         {/* Email input */}
         <View className="mb-5">
           <Text
-            className={`text-sm mb-2 font-medium ${
+            className={`text-sm mb-2 font-medium  ${
               theme === "dark" ? "text-gray-200" : "text-gray-700"
             }`}
           >

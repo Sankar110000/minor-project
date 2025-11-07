@@ -46,7 +46,7 @@ export default function adminAssignment() {
         </Text>
       </View>
 
-     { item.isBtnShow&& <View
+     { item.isBtnShow ? <View
         className={`
           px-3 py-1 rounded-full 
           ${item.completed ? "bg-green-500/20" : "bg-orange-500/20"}
@@ -60,7 +60,7 @@ export default function adminAssignment() {
         >
           {item.completed ? "Completed" : "Pending"}
         </Text>
-      </View>}
+      </View>: null}
     </TouchableOpacity>
   );
 

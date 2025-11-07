@@ -3,21 +3,21 @@ import TouchableBtn from "@/components/TouchableBtn";
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
-  View,
+  Image,
+  Pressable,
   Text,
   TextInput,
-  Image,
   TouchableOpacity,
-  Pressable,
+  useColorScheme,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import { useColorScheme } from "react-native";
 
 export default function UserProfile() {
   const scheme = useColorScheme();
@@ -88,7 +88,7 @@ export default function UserProfile() {
             <Entypo name="dots-three-vertical" size={24} color={iconColor} />
           </TouchableOpacity>
 
-          {menuVisible && (
+          {menuVisible ? (
             <View
               className="absolute top-14 right-4 rounded-xl shadow-md"
               style={{ backgroundColor: cardBg, borderColor, borderWidth: 1 }}
@@ -100,7 +100,7 @@ export default function UserProfile() {
                 <Text className="text-white font-bold text-base">Logout</Text>
               </Pressable>
             </View>
-          )}
+          ) :null}
         </BlurView>
 
         {/* Profile Section */}
@@ -148,7 +148,7 @@ export default function UserProfile() {
         </View>
 
         {/* Edit Form */}
-        {showForm && (
+        {showForm ? (
           <View
             className="mt-6 mx-6 p-5 rounded-xl"
             style={{ backgroundColor: cardBg, borderColor, borderWidth: 1 }}
@@ -177,7 +177,7 @@ export default function UserProfile() {
               textStyle="text-white text-lg font-bold text-center"
             />
           </View>
-        )}
+        ): null}
       </LinearGradient>
     </SafeAreaView>
   );

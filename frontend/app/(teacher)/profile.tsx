@@ -1,18 +1,18 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Alert,
-  useColorScheme,
-} from "react-native";
-import React, { useEffect, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const TeacherProfile = () => {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -24,14 +24,13 @@ const TeacherProfile = () => {
   const cardBg = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
   const borderColor = isDarkMode ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
   const iconColor = isDarkMode ? "#fff" : "#000";
-   const [user, setUser]:any = useState({});
- 
+  const [user, setUser] = useState({ fullname: "", email: "", role: "" });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const userProfile = await AsyncStorage.getItem("user");
-        
-        
+
         if (userProfile) {
           const data = JSON.parse(userProfile);
           setUser(data);
@@ -73,18 +72,22 @@ const TeacherProfile = () => {
           className="px-5 py-4 flex-row justify-between items-center border-b"
           style={{ borderBottomColor: borderColor }}
         >
-           
-          <Text className="text-2xl font-semibold tracking-wide" style={{ color: textColor }}>
+          <Text
+            className="text-2xl font-semibold tracking-wide"
+            style={{ color: textColor }}
+          >
             Teacher Profile
           </Text>
 
-         
-
-          <TouchableOpacity activeOpacity={0.7} onPress={toggleMenu} className="p-2 rounded-full">
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={toggleMenu}
+            className="p-2 rounded-full"
+          >
             <Entypo name="dots-three-vertical" size={22} color={iconColor} />
           </TouchableOpacity>
 
-          {menuVisible && (
+          {menuVisible ? (
             <View
               className="absolute top-16 right-5 rounded-xl shadow-lg"
               style={{
@@ -98,10 +101,12 @@ const TeacherProfile = () => {
                 activeOpacity={0.8}
                 className="px-5 py-3 bg-red-600 rounded"
               >
-                <Text className="text-white font-semibold text-base">Logout</Text>
+                <Text className="text-white font-semibold text-base">
+                  Logout
+                </Text>
               </TouchableOpacity>
             </View>
-          )}
+          ): null}
         </BlurView>
 
         {/* Profile Section */}
@@ -117,7 +122,7 @@ const TeacherProfile = () => {
             Mr. {user?.fullname}
           </Text>
           <Text className="text-base mt-1" style={{ color: subTextColor }}>
-            Physics Lecturer
+            {user ? user.role : null}
           </Text>
         </View>
 
@@ -132,12 +137,19 @@ const TeacherProfile = () => {
             <View
               key={index}
               className="rounded-2xl p-4"
-              style={{ backgroundColor: cardBg, borderColor: borderColor, borderWidth: 1 }}
+              style={{
+                backgroundColor: cardBg,
+                borderColor: borderColor,
+                borderWidth: 1,
+              }}
             >
               <Text className="text-sm" style={{ color: subTextColor }}>
                 {item.label}
               </Text>
-              <Text className="text-lg font-semibold mt-1" style={{ color: textColor }}>
+              <Text
+                className="text-lg font-semibold mt-1"
+                style={{ color: textColor }}
+              >
                 {item.value}
               </Text>
             </View>
