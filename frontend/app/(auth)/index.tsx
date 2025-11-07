@@ -1,19 +1,19 @@
+import { DEV_URL } from "@/components/config";
+import TouchableBtn from "@/components/TouchableBtn";
+import { Picker } from "@react-native-picker/picker";
+import axios from "axios";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
   Text,
   TextInput,
-  Alert,
-  ActivityIndicator,
   useColorScheme,
-  ScrollView,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-import { Picker } from "@react-native-picker/picker";
-import { router } from "expo-router";
-import { BASE_URL } from "@/components/config";
-import TouchableBtn from "@/components/TouchableBtn";
 import { moderateScale } from "react-native-size-matters";
 
 export default function RegisterScreen() {
@@ -33,7 +33,7 @@ export default function RegisterScreen() {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${BASE_URL}/api/user/register`,
+        `${DEV_URL}/api/user/register`,
         { fullname, email, password, role },
         { withCredentials: true }
       );
@@ -60,7 +60,9 @@ export default function RegisterScreen() {
     ? "bg-zinc-900"
     : "bg-gradient-to-br from-blue-100 to-purple-200";
 
-  const cardBg = isDark ? "bg-zinc-800/90 border-zinc-700" : "bg-white border-gray-200";
+  const cardBg = isDark
+    ? "bg-zinc-800/90 border-zinc-700"
+    : "bg-white border-gray-200";
   const textColor = isDark ? "text-white" : "text-gray-900";
   const placeholderColor = isDark ? "#9ca3af" : "#6b7280";
 
@@ -91,7 +93,9 @@ export default function RegisterScreen() {
             placeholder="Full Name"
             placeholderTextColor={placeholderColor}
             className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
-              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+              isDark
+                ? "border-zinc-700 bg-zinc-900"
+                : "border-gray-300 bg-gray-50"
             }`}
           />
 
@@ -104,7 +108,9 @@ export default function RegisterScreen() {
             autoCapitalize="none"
             placeholderTextColor={placeholderColor}
             className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
-              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+              isDark
+                ? "border-zinc-700 bg-zinc-900"
+                : "border-gray-300 bg-gray-50"
             }`}
           />
 
@@ -116,14 +122,18 @@ export default function RegisterScreen() {
             secureTextEntry
             placeholderTextColor={placeholderColor}
             className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
-              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+              isDark
+                ? "border-zinc-700 bg-zinc-900"
+                : "border-gray-300 bg-gray-50"
             }`}
           />
 
           {/* Role Picker */}
           <View
             className={`border rounded-xl mb-4 ${
-              isDark ? "border-zinc-700 bg-zinc-900" : "border-gray-300 bg-gray-50"
+              isDark
+                ? "border-zinc-700 bg-zinc-900"
+                : "border-gray-300 bg-gray-50"
             }`}
           >
             <Picker

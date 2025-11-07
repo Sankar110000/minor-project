@@ -1,14 +1,14 @@
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
-  View,
+  Image,
+  ScrollView,
   Text,
   TouchableOpacity,
-  ScrollView,
-  Image,
   useColorScheme,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FontAwesome5, MaterialIcons, Ionicons } from "@expo/vector-icons";
 
 const Index = () => {
   const colorScheme = useColorScheme();

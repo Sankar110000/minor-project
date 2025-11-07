@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/components/config";
+import { DEV_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -53,7 +53,7 @@ function UserProfile() {
         },
       };
       const res = await axios.post(
-        `${BASE_URL}/api/user/getUser`,
+        `${DEV_URL}/api/user/getUser`,
         {},
         {
           headers: {
