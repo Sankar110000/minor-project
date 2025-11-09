@@ -81,7 +81,7 @@ export default function RandomQRCode() {
       };
 
       const res = await axios.post(`${DEV_URL}/api/class/create`, body);
-
+      console.log(res.data);
       if (res.data.success) {
         setQrValue({
           ...res.data.savedClass,
@@ -183,19 +183,19 @@ export default function RandomQRCode() {
             <>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Subject:</Text>{" "}
-                {currClass && currClass.title}
+                {currClass ? currClass.title : null}
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Teacher:</Text>{" "}
-                {currClass && currClass.classTeacher?.fullname}
+                {currClass ? currClass.classTeacher?.fullname : null}
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Start time:</Text>{" "}
-                {currClass && currClass.startTime}
+                {currClass ? currClass.startTime : null}
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">End time:</Text>{" "}
-                {currClass && currClass.endTime}
+                {currClass ? currClass.endTime : null}
               </Text>
             </>
           ) : (
@@ -242,7 +242,7 @@ export default function RandomQRCode() {
         </TouchableOpacity>
       )}
 
-      {modalVisible && (
+      {modalVisible ? (
         <Modal
           animationType="slide"
           transparent={true}
@@ -295,7 +295,7 @@ export default function RandomQRCode() {
               </Pressable>
 
               {/* DateTimePicker */}
-              {showPicker && (
+              {showPicker ? (
                 <DateTimePicker
                   value={time}
                   mode="time"
@@ -303,7 +303,7 @@ export default function RandomQRCode() {
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={onTimeChnage}
                 />
-              )}
+              ) : null}
 
               {/* Start time Read-Only Input */}
               <Text className="w-full text-sm font-medium text-gray-700 mb-1">
@@ -330,7 +330,7 @@ export default function RandomQRCode() {
             </View>
           </View>
         </Modal>
-      )}
+      ) : null}
     </View>
   );
 }

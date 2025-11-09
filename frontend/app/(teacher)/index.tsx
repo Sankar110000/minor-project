@@ -1,4 +1,5 @@
 import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
 import {
   Image,
@@ -39,10 +40,14 @@ const Index = () => {
             </Text>
           </View>
 
-          <Image
-            source={{ uri: "https://randomuser.me/api/portraits/men/1.jpg" }}
-            className="w-12 h-12 rounded-full border-2 border-orange-500"
-          />
+          <TouchableOpacity onPress={() => router.push("/(teacher)/profile")}>
+            <Image
+              source={{
+                uri: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+              }}
+              className="w-12 h-12 rounded-full border-2 border-orange-500"
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Quick Actions Section */}
@@ -51,6 +56,7 @@ const Index = () => {
         </Text>
         <View className="flex-row flex-wrap justify-between">
           <TouchableOpacity
+            onPress={() => router.push("/(teacher)/(drawer)/viewStudent")}
             className={`w-[48%] ${cardBg} p-4 rounded-2xl mb-3 ${borderColor} border backdrop-blur-md`}
           >
             <FontAwesome5 name="user-graduate" size={28} color="#f97316" />
@@ -60,6 +66,7 @@ const Index = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => router.push("/(teacher)/(drawer)/adminAssignment")}
             className={`w-[48%] ${cardBg} p-4 rounded-2xl mb-3 ${borderColor} border backdrop-blur-md`}
           >
             <MaterialIcons name="assignment" size={28} color="#f97316" />
@@ -69,6 +76,7 @@ const Index = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => router.push("/(teacher)/(drawer)/attendance")}
             className={`w-[48%] ${cardBg} p-4 rounded-2xl mb-3 ${borderColor} border backdrop-blur-md`}
           >
             <Ionicons name="calendar-outline" size={28} color="#f97316" />
@@ -78,11 +86,12 @@ const Index = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => router.push("/(teacher)/(drawer)/previousClass")}
             className={`w-[48%] ${cardBg} p-4 rounded-2xl mb-3 ${borderColor} border backdrop-blur-md`}
           >
-            <MaterialIcons name="notifications" size={28} color="#f97316" />
+            <MaterialIcons name="class" size={28} color="#f97316" />
             <Text className={`${textMain} text-base mt-2 font-semibold`}>
-              Announcements
+              Previous Classes
             </Text>
           </TouchableOpacity>
         </View>

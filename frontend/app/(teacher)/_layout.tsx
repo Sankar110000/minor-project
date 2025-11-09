@@ -42,6 +42,13 @@ export default function TabLayout() {
            tabBarIcon: ({ color }) => <AntDesign size={28} name="user" color={color} />,
         }}
       />
+       <Tabs.Screen
+          name="(drawer)"
+          options={{
+            href: null,
+          }}
+        />
+      
     </Tabs>
   );
 }

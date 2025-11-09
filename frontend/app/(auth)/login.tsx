@@ -1,8 +1,4 @@
-import { DEV_URL } from "@/components/config";
-import TouchableBtn from "@/components/TouchableBtn";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useRouter } from "expo-router"; // ✅ useRouter hook
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,6 +9,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { DEV_URL } from "@/components/config";
+import TouchableBtn from "@/components/TouchableBtn";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { useRouter } from "expo-router";
+
 import { moderateScale } from "react-native-size-matters";
 
 const Login = () => {
@@ -40,24 +43,20 @@ const Login = () => {
       if (response.data.success) {
         console.log(response.data);
         await AsyncStorage.setItem("token", response.data?.token);
-        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
-        await AsyncStorage.setItem("role", response.data.user.role);
+
+        await AsyncStorage.setItem("role", response.data?.user.role);
+        await AsyncStorage.setItem("user", JSON.stringify(response.data?.user));
 
         const role = await AsyncStorage.getItem("role");
-        // Reset form
         setEmail("");
         setPassword("");
 
-        // ✅ Redirect to user/teacher dashboard (example: "/(user)")
         role === "student" ? router.push("/(user)") : router.push("/(teacher)");
       } else {
         Alert.alert("Login failed", response.data.message || "Try again");
       }
-    } catch (error: any) {
-      Alert.alert(
-        "Login Error",
-        error.response?.data?.message || "Something went wrong"
-      );
+    } catch (error) {
+      Alert.alert("Login Error", "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -66,14 +65,12 @@ const Login = () => {
   return (
     <SafeAreaView
       className={`flex-1 px-6 justify-center ${
-        theme === "dark"
-          ? "bg-gradient-to-br from-gray-900 via-gray-800 to-black"
-          : "bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100"
+        theme === "dark" ? "bg-gray-900" : "bg-gray-100"
       }`}
     >
       {/* Glass card */}
       <View
-        className={`rounded-3xl border p-6 shadow-2xl backdrop-blur-md ${
+        className={`rounded-xl border p-6 shadow-2xl backdrop-blur-md ${
           theme === "dark"
             ? "bg-white/10 border-white/20"
             : "bg-white border-gray-200"
@@ -103,7 +100,7 @@ const Login = () => {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={theme === "dark" ? "#9ca3af" : "#6b7280"}
-            className={`border rounded-2xl px-4 py-3 ${
+            className={`border rounded-lg px-4 py-3 ${
               theme === "dark"
                 ? "bg-white/10 text-white border-white/30"
                 : "bg-white text-gray-900 border-gray-300"
@@ -126,7 +123,7 @@ const Login = () => {
             placeholder="Enter your password"
             secureTextEntry
             placeholderTextColor={theme === "dark" ? "#9ca3af" : "#6b7280"}
-            className={`border rounded-2xl px-4 py-3 ${
+            className={`border rounded-lg px-4 py-3 ${
               theme === "dark"
                 ? "bg-white/10 text-white border-white/30"
                 : "bg-white text-gray-900 border-gray-300"
@@ -138,10 +135,10 @@ const Login = () => {
         <TouchableBtn
           title={
             isLoading ? (
-              <>
-                <ActivityIndicator size={moderateScale(15)} color={"#fff"} />{" "}
-                Login...
-              </>
+              <View className="flex-row items-center justify-center gap-2">
+                <ActivityIndicator size={moderateScale(15)} color={"#fff"} />
+                <Text className="text-white font-semibold">Logging in...</Text>
+              </View>
             ) : (
               "Login"
             )
@@ -171,7 +168,7 @@ const Login = () => {
             theme === "dark" ? "text-indigo-300" : "text-indigo-700"
           }`}
         >
-          Create a New Account
+          Create A New Account
         </Text>
       </View>
     </SafeAreaView>

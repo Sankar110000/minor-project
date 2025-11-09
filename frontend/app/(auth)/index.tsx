@@ -56,13 +56,12 @@ export default function RegisterScreen() {
   };
 
   const isDark = scheme === "dark";
-  const bgGradient = isDark
-    ? "bg-zinc-900"
-    : "bg-gradient-to-br from-blue-100 to-purple-200";
+  const bgGradient = isDark ? "bg-gray-900" : "bg-gray-100";
 
   const cardBg = isDark
-    ? "bg-zinc-800/90 border-zinc-700"
-    : "bg-white border-gray-200";
+    ? "bg-white/10 border-white/20"
+    : "bg-white/60 border-gray-200";
+
   const textColor = isDark ? "text-white" : "text-gray-900";
   const placeholderColor = isDark ? "#9ca3af" : "#6b7280";
 
@@ -77,7 +76,9 @@ export default function RegisterScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className={`w-full rounded-2xl border p-6 shadow-lg ${cardBg}`}>
+        <View
+          className={`w-full rounded-2xl border p-6 shadow-2xl backdrop-blur-md ${cardBg}`}
+        >
           <Text
             className={`text-3xl font-extrabold text-center mb-8 ${
               isDark ? "text-blue-400" : "text-blue-700"
@@ -92,10 +93,10 @@ export default function RegisterScreen() {
             onChangeText={setFullname}
             placeholder="Full Name"
             placeholderTextColor={placeholderColor}
-            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+            className={`border rounded-lg px-4 py-3 mb-4 text-base ${textColor} ${
               isDark
-                ? "border-zinc-700 bg-zinc-900"
-                : "border-gray-300 bg-gray-50"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
             }`}
           />
 
@@ -107,10 +108,10 @@ export default function RegisterScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor={placeholderColor}
-            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+            className={`border rounded-lg px-4 py-3 mb-4 text-base ${textColor} ${
               isDark
-                ? "border-zinc-700 bg-zinc-900"
-                : "border-gray-300 bg-gray-50"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
             }`}
           />
 
@@ -121,19 +122,19 @@ export default function RegisterScreen() {
             placeholder="Password"
             secureTextEntry
             placeholderTextColor={placeholderColor}
-            className={`border rounded-xl px-4 py-3 mb-4 text-base ${textColor} ${
+            className={`border rounded-lg px-4 py-3 mb-4 text-base ${textColor} ${
               isDark
-                ? "border-zinc-700 bg-zinc-900"
-                : "border-gray-300 bg-gray-50"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
             }`}
           />
 
           {/* Role Picker */}
           <View
-            className={`border rounded-xl mb-4 ${
+            className={`border rounded-lg  px-3 mb-4 ${
               isDark
-                ? "border-zinc-700 bg-zinc-900"
-                : "border-gray-300 bg-gray-50"
+                ? "bg-white/10 text-white border-white/30"
+                : "bg-white text-gray-900 border-gray-300"
             }`}
           >
             <Picker

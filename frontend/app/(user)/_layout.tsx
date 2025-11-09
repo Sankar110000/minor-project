@@ -1,8 +1,8 @@
-import { Tabs } from 'expo-router';
+import { Stack, Tabs } from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
+
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { View } from 'react-native';
@@ -11,6 +11,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const iconColor = colorScheme === 'dark' ? 'black' : 'white';
   return (
+    <>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
@@ -26,6 +27,13 @@ export default function TabLayout() {
   tabBarIcon: ({ color }) => <AntDesign size={28} name="home" color={color} />,
         }}
       />
+
+   <Tabs.Screen
+    name="(drawer)"
+    options={{
+      href: null,
+    }}
+  />
       <Tabs.Screen
         name="generate_qr"
         options={{
@@ -43,5 +51,7 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+  
+</>
   );
 }

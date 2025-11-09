@@ -34,6 +34,7 @@ const TeacherProfile = () => {
         if (userProfile) {
           const data = JSON.parse(userProfile);
           setUser(data);
+          
         }
       } catch (error) {
         console.error("Failed to load user:", error);
@@ -61,11 +62,7 @@ const TeacherProfile = () => {
     <SafeAreaView className="flex-1">
       {/* Background Gradient */}
       <LinearGradient
-        colors={
-          isDarkMode
-            ? ["#111827", "#111827", "#111827"]
-            : ["#fefefe", "#ffe7d6", "#ffd1a9"]
-        }
+        colors={isDarkMode ? ["#111827","#111827","#111827"] : ["#ffffff", "#ffffff", "#ffffff"]}
         style={{ flex: 1 }}
       >
         {/* Header with Glass Effect */}
@@ -90,7 +87,7 @@ const TeacherProfile = () => {
             <Entypo name="dots-three-vertical" size={22} color={iconColor} />
           </TouchableOpacity>
 
-          {menuVisible && (
+          {menuVisible ? (
             <View
               className="absolute top-16 right-5 rounded-xl shadow-lg"
               style={{
@@ -109,7 +106,7 @@ const TeacherProfile = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          ): null}
         </BlurView>
 
         {/* Profile Section */}
@@ -121,14 +118,11 @@ const TeacherProfile = () => {
             className="w-32 h-32 rounded-full"
             style={{ borderWidth: 4, borderColor: borderColor }}
           />
-          <Text
-            className="text-2xl font-semibold mt-4"
-            style={{ color: textColor }}
-          >
-            {user && user.fullname}
+          <Text className="text-2xl font-semibold mt-4" style={{ color: textColor }}>
+            Mr. {user?.fullname}
           </Text>
           <Text className="text-base mt-1" style={{ color: subTextColor }}>
-            {user && user.role}
+            {user ? user.role : null}
           </Text>
         </View>
 
@@ -137,7 +131,7 @@ const TeacherProfile = () => {
           {[
             { label: "Experience", value: "8 Years" },
             { label: "Subjects Taught", value: "Physics, Mathematics" },
-            { label: "Email", value: user && user.email },
+            { label: "Email", value: user.email },
             { label: "Contact Number", value: "+91 98765 43210" },
           ].map((item, index) => (
             <View
