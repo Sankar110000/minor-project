@@ -1,4 +1,4 @@
-import { DEV_URL } from "@/components/config";
+import { BASE_URL } from "@/components/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
@@ -80,7 +80,7 @@ export default function RandomQRCode() {
         endTime: time,
       };
 
-      const res = await axios.post(`${DEV_URL}/api/class/create`, body);
+      const res = await axios.post(`${BASE_URL}/api/class/create`, body);
       console.log(res.data);
       if (res.data.success) {
         setQrValue({
@@ -101,7 +101,7 @@ export default function RandomQRCode() {
 
   const handleEndClass = async () => {
     try {
-      const res = await axios.post(`${DEV_URL}/api/class/endClass`, {
+      const res = await axios.post(`${BASE_URL}/api/class/endClass`, {
         classID: currClass?._id,
       });
       if (res.data.success) {
@@ -126,7 +126,8 @@ export default function RandomQRCode() {
     try {
       const userString = await AsyncStorage.getItem("user");
       const user = userString ? JSON.parse(userString) : null;
-      const res = await axios.post(`${DEV_URL}/api/class/getCurrClass`, {
+      console.log(user);
+      const res = await axios.post(`${BASE_URL}/api/class/getCurrClass`, {
         teacherID: user._id,
       });
       if (res.data.success) {
@@ -187,7 +188,7 @@ export default function RandomQRCode() {
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Teacher:</Text>{" "}
-                {currClass ? currClass.classTeacher?.fullname : null}
+                {currClass ? currClass.classTeacher.fullname : null}
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Start time:</Text>{" "}

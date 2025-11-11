@@ -1,6 +1,5 @@
-import { Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "react-native";
+import { Text, useColorScheme, View } from "react-native";
 
 export const Card = ({ subject, maamName, time, present, title }: any) => {
   const theme = useColorScheme();
@@ -22,7 +21,11 @@ export const Card = ({ subject, maamName, time, present, title }: any) => {
     >
       {/* Subject Row */}
       <View className="flex-row items-center mb-2">
-        <Ionicons name="book-outline" size={26} color={isDark ? "#f97316" : "#f97316"} />
+        <Ionicons
+          name="book-outline"
+          size={26}
+          color={isDark ? "#f97316" : "#f97316"}
+        />
         <Text className={`ml-3 text-xl font-medium ${textMain}`}>
           {subject}
         </Text>
@@ -30,25 +33,14 @@ export const Card = ({ subject, maamName, time, present, title }: any) => {
 
       {/* Teacher */}
       <Text className={`${textSub} text-base`}>
-        👩‍🏫 Teacher: <Text className={`${textMain} font-medium`}>{maamName}</Text>
+        👩‍🏫 Teacher:{" "}
+        <Text className={`${textMain} font-medium`}>{maamName}</Text>
       </Text>
 
       {/* Time */}
       <Text className={`${textSub} text-base mt-1`}>
         ⏰ Time: <Text className={`${textMain} font-medium`}>{time}</Text>
       </Text>
-
-      {/* Status Button */}
-      <TouchableOpacity
-        activeOpacity={0.85}
-        className={`mt-4 py-3 rounded-xl items-center
-          ${present ? "bg-green-500" : "bg-red-500"}
-        `}
-      >
-        <Text className="text-white font-medium text-base">
-          {title}
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 };

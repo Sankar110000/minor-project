@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { DEV_URL } from "@/components/config";
+import { BASE_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -35,13 +35,12 @@ const Login = () => {
       setIsLoading(true);
 
       const response = await axios.post(
-        `${DEV_URL}/api/user/login`,
+        `${BASE_URL}/api/user/login`,
         { email, password },
         { withCredentials: true }
       );
 
       if (response.data.success) {
-        console.log(response.data);
         await AsyncStorage.setItem("token", response.data?.token);
 
         await AsyncStorage.setItem("role", response.data?.user.role);

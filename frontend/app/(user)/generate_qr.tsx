@@ -1,4 +1,4 @@
-import { DEV_URL } from "@/components/config";
+import { BASE_URL } from "@/components/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { CameraView } from "expo-camera";
@@ -33,7 +33,7 @@ const generate_qr = () => {
             const classData = JSON.parse(data);
             if (!barCodeScanned) {
               const res = await axios.post(
-                `${DEV_URL}/api/user/markAttendance`,
+                `${BASE_URL}/api/user/markAttendance`,
                 {
                   classID: classData._id,
                   studentID: user._id,

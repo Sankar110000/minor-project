@@ -1,19 +1,19 @@
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Redirect, Stack } from "expo-router";
+import * as ScreenCapture from "expo-screen-capture";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import "../global.css";
-import "react-native-reanimated";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as ScreenCapture from "expo-screen-capture";
 import { Alert } from "react-native";
+import "react-native-reanimated";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,8 +23,6 @@ export default function RootLayout() {
   const [token, setToken] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
-    
 
   useEffect(() => {
     ScreenCapture.preventScreenCaptureAsync();
