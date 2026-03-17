@@ -1,5 +1,4 @@
 import { BASE_URL } from "@/components/config";
-import TouchableBtn from "@/components/TouchableBtn";
 import { Entypo } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -12,7 +11,6 @@ import {
   Image,
   Pressable,
   Text,
-  TextInput,
   TouchableOpacity,
   useColorScheme,
   View,
@@ -32,7 +30,7 @@ export default function UserProfile() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const [user, setUser] = useState({ email: "", id: "", role: "" });
+  const [user, setUser] = useState({});
 
   axios.defaults.withCredentials = true;
 
@@ -66,7 +64,12 @@ export default function UserProfile() {
           },
         }
       );
-      setUser(res.data.data);
+      console.log(res.data.data);
+      setUser({
+        email: res.data.data.email,
+        role: res.data.data.role,
+        fullname: res.data.data.fullname,
+      });
     } catch (error) {
       console.log("Error:", error);
     }
@@ -126,14 +129,14 @@ export default function UserProfile() {
             style={{ color: textColor }}
             className="text-2xl font-bold mt-4"
           >
-            {editedName || user.email.split("@")[0]}
+            {user && user.fullname}
           </Text>
 
           <Text
             className="text-base mt-1"
             style={{ color: isDark ? "#F97316" : "#EA580C" }}
           >
-            Role: {user.role}
+            Role: {user && user.role}
           </Text>
         </View>
 
@@ -152,52 +155,18 @@ export default function UserProfile() {
             className="text-lg font-semibold mt-1"
             style={{ color: textColor }}
           >
-            {user.email}
+            {user && user.fullname}
+          </Text>
+          <Text className="text-sm" style={{ color: subTextColor }}>
+            {"email"}
+          </Text>
+          <Text
+            className="text-lg font-semibold mt-1"
+            style={{ color: textColor }}
+          >
+            {user && user.role}
           </Text>
         </View>
-        {/* Edit Button */}
-        <View className="mt-8 px-6">
-          <TouchableBtn
-            onPress={() => setShowForm(!showForm)}
-            title={showForm ? "Close" : "Edit Details"}
-            btnStyle="bg-orange-500 rounded-xl py-3"
-            textStyle="text-white text-lg font-semibold text-center"
-          />
-        </View>
-
-        {/* Edit Form */}
-        {showForm ? (
-          <View
-            className="mt-6 mx-6 p-5 rounded-xl"
-            style={{ backgroundColor: cardBg, borderColor, borderWidth: 1 }}
-          >
-            <Text
-              style={{ color: textColor }}
-              className="font-semibold text-lg mb-2"
-            >
-              Update Username
-            </Text>
-
-            <TextInput
-              value={editedName}
-              onChangeText={setEditedName}
-              placeholder="Enter new name"
-              placeholderTextColor={subTextColor}
-              className="rounded-lg p-3 text-lg"
-              style={{
-                backgroundColor: isDark ? "#1f2937" : "#e5e7eb",
-                color: textColor,
-              }}
-            />
-
-            <TouchableBtn
-              onPress={() => Alert.alert("Updated Successfully")}
-              title="Save"
-              btnStyle="bg-orange-500 rounded-xl py-3 mt-4"
-              textStyle="text-white text-lg font-bold text-center"
-            />
-          </View>
-        ) : null}
       </LinearGradient>
     </SafeAreaView>
   );

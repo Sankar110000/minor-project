@@ -10,16 +10,36 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "@/components/config";
 
 const data = [
-  { id: "1", maamName: "Mrs. Smith", subject: "Math", time: "9:00 AM", present: true, title: "Going On..." },
-  { id: "2", maamName: "Ms. Johnson", subject: "Science", time: "10:00 AM", present: true, title: "Going On..." },
-  { id: "3", maamName: "Mrs. Lee", subject: "History", time: "11:00 AM", present: true, title: "Going On..." }
+  {
+    id: "1",
+    maamName: "Mrs. Smith",
+    subject: "Math",
+    time: "9:00 AM",
+    present: true,
+    title: "Going On...",
+  },
+  {
+    id: "2",
+    maamName: "Ms. Johnson",
+    subject: "Science",
+    time: "10:00 AM",
+    present: true,
+    title: "Going On...",
+  },
+  {
+    id: "3",
+    maamName: "Mrs. Lee",
+    subject: "History",
+    time: "11:00 AM",
+    present: true,
+    title: "Going On...",
+  },
 ];
 
 export default function App() {
-
   const [user, setUser] = useState({
     email: "",
-    fullname: ""
+    fullname: "",
   });
 
   const scheme = useColorScheme();
@@ -52,18 +72,16 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaView className={`flex-1 px-5 ${bgColor}`}>
-      
+    <SafeAreaView className={`flex-1 ${bgColor}`}>
       {/* Username */}
-      <Text className={`text-3xl font-semibold mt-3 ${textMain}`}>
+      <Text className={`text-3xl font-semibold mt-3 ms-6 ${textMain}`}>
         Hello, {user?.fullname} 👋
       </Text>
 
       {/* Feature Boxes */}
-      <View className="flex-row justify-between mt-6">
-        
+      <View className="flex-row justify-between mt-6 px-5">
         <TouchableOpacity
-        activeOpacity={0.9}
+          activeOpacity={0.9}
           onPress={() => router.push("/(user)/(drawer)/allAssignment")}
           className={`w-[48%] p-5 rounded-xl flex items-center justify-center 
           border ${borderColor} ${cardBg} shadow`}
@@ -75,21 +93,24 @@ export default function App() {
         </TouchableOpacity>
 
         <TouchableOpacity
-        activeOpacity={0.9}
+          activeOpacity={0.9}
           onPress={() => router.push("/(user)/(drawer)/allClass")}
           className={`w-[48%] p-5 rounded-xl flex items-center border 
           ${borderColor} ${cardBg} shadow`}
         >
-          <Ionicons name="book-outline" size={28} color={isDark?"white":"gray"} />
+          <Ionicons
+            name="book-outline"
+            size={28}
+            color={isDark ? "white" : "gray"}
+          />
           <Text className={`text-base font-semibold mt-1 ${textMain}`}>
             All Classes
           </Text>
         </TouchableOpacity>
-
       </View>
 
       {/* Today Classes Title */}
-      <Text className={`text-2xl font-semibold mt-8 mb-3 ${textMain}`}>
+      <Text className={`text-2xl font-semibold m-5 mt-8 mb-3 ${textMain}`}>
         Today’s Classes 📚
       </Text>
 

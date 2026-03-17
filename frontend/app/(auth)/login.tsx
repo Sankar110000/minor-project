@@ -37,7 +37,7 @@ const Login = () => {
       const response = await axios.post(
         `${BASE_URL}/api/user/login`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       if (response.data.success) {
@@ -55,6 +55,7 @@ const Login = () => {
         Alert.alert("Login failed", response.data.message || "Try again");
       }
     } catch (error) {
+      console.log(error);
       Alert.alert("Login Error", "Something went wrong");
     } finally {
       setIsLoading(false);

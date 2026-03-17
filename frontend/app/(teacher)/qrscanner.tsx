@@ -25,6 +25,7 @@ export default function RandomQRCode() {
   const [title, setTitle] = useState();
   const [time, setTime] = useState(new Date(Date.now()));
   const [showPicker, setShowPicker] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [currClass, setCurrClass] = useState<{
     title: string;
     _id: string;
@@ -67,8 +68,8 @@ export default function RandomQRCode() {
     setShowPicker(false);
   };
 
-  // 🔹 Handle Generate (FUNCTIONALITY - UNTOUCHED)
   const handleGenerate = async () => {
+    setLoading(true);
     try {
       Alert.alert("Genarting QR");
       const userString = await AsyncStorage.getItem("user");
@@ -81,21 +82,30 @@ export default function RandomQRCode() {
       };
 
       const res = await axios.post(`${BASE_URL}/api/class/create`, body);
-      console.log(res.data);
       if (res.data.success) {
         setQrValue({
-          ...res.data.savedClass,
+          _id: res.data._id,
+          title: res.data.title,
+          classTeacher: res.data.classTeacher,
+          startTime: res.data.startTime,
+          endTime: res.data.endTime,
           token: generateRandomValue(),
           expiry: Date.now() + 5 * 1000,
         });
         setIsQrGenerated(true);
         setModalVisible(false);
+        await AsyncStorage.setItem(
+          "currClass",
+          JSON.stringify(res.data.savedClass),
+        );
         Alert.alert("Qr code generated successfully");
       } else {
         Alert.alert(res.data.message);
       }
+      setLoading(false);
     } catch (error) {
       Alert.alert(`Error while generating QR : ${error}`);
+      console.log(`Error while generating QR : ${error}`);
     }
   };
 
@@ -105,8 +115,8 @@ export default function RandomQRCode() {
         classID: currClass?._id,
       });
       if (res.data.success) {
-        console.log(res.data);
         Alert.alert(res.data.message);
+        await AsyncStorage.removeItem("currClass");
         setClassOnGoing(false);
       }
     } catch (error) {
@@ -114,19 +124,16 @@ export default function RandomQRCode() {
     }
   };
 
-  // 🔹 Dynamic colors based on theme (FUNCTIONALITY - UNTOUCHED)
   const isDark = colorScheme === "dark";
   const bgColor = isDark ? "bg-gray-900" : "bg-gray-100";
   const textColor = isDark ? "text-white" : "text-gray-800";
   const cardColor = isDark ? "bg-gray-800" : "bg-white";
   const qrBgColor = isDark ? "#111827" : "#ffffff";
 
-  // 🔹 Get Data (FUNCTIONALITY - UNTOUCHED)
   async function getData() {
     try {
       const userString = await AsyncStorage.getItem("user");
       const user = userString ? JSON.parse(userString) : null;
-      console.log(user);
       const res = await axios.post(`${BASE_URL}/api/class/getCurrClass`, {
         teacherID: user._id,
       });
@@ -134,7 +141,7 @@ export default function RandomQRCode() {
         setQrValue({
           ...res.data.currClass,
           token: generateRandomValue(),
-          expiry: Date.now() + 5 * 1000,
+          expiry: new Date(Date.now() + 5 * 1000),
         });
         setCurrClass(res.data.currClass);
         setClassOnGoing(true);
@@ -148,7 +155,6 @@ export default function RandomQRCode() {
     }
   }
 
-  // 🔹 Handle Title Change (FUNCTIONALITY - UNTOUCHED)
   const handleTitleChange = (e: any) => {
     setTitle(e);
   };
@@ -192,11 +198,15 @@ export default function RandomQRCode() {
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">Start time:</Text>{" "}
-                {currClass ? currClass.startTime : null}
+                {currClass
+                  ? new Date(currClass.startTime).toLocaleTimeString()
+                  : null}
               </Text>
               <Text className="dark:text-white text-base">
                 <Text className="font-medium">End time:</Text>{" "}
-                {currClass ? currClass.endTime : null}
+                {currClass
+                  ? new Date(currClass.endTime).toLocaleTimeString()
+                  : null}
               </Text>
             </>
           ) : (
@@ -277,6 +287,19 @@ export default function RandomQRCode() {
                 onChangeText={handleTitleChange}
               />
 
+              {/* Start time Read-Only Input */}
+              <Text className="w-full text-sm font-medium text-gray-700 mb-1">
+                Start Time (Now)
+              </Text>
+              <TextInput
+                className="h-12 border border-gray-300 rounded-lg mb-6 px-4 w-full text-lg bg-gray-100 text-gray-500"
+                value={new Date(Date.now()).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                editable={false}
+              />
+
               {/* End time Input/Picker Trigger */}
               <Text className="w-full text-sm font-medium text-gray-700 mb-1">
                 End Time
@@ -305,19 +328,6 @@ export default function RandomQRCode() {
                   onChange={onTimeChnage}
                 />
               ) : null}
-
-              {/* Start time Read-Only Input */}
-              <Text className="w-full text-sm font-medium text-gray-700 mb-1">
-                Start Time (Now)
-              </Text>
-              <TextInput
-                className="h-12 border border-gray-300 rounded-lg mb-6 px-4 w-full text-lg bg-gray-100 text-gray-500"
-                value={new Date(Date.now()).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-                editable={false}
-              />
 
               {/* Submit Button */}
               <Pressable

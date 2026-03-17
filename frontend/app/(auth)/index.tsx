@@ -1,4 +1,4 @@
-import { DEV_URL } from "@/components/config";
+import { BASE_URL } from "@/components/config";
 import TouchableBtn from "@/components/TouchableBtn";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
@@ -33,7 +33,7 @@ export default function RegisterScreen() {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${DEV_URL}/api/user/register`,
+        `${BASE_URL}/api/user/register`,
         { fullname, email, password, role },
         { withCredentials: true }
       );

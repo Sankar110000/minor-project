@@ -14,7 +14,7 @@ export const Card = ({ subject, maamName, time, present, title }: any) => {
   return (
     <View
       className={`
-        rounded-2xl p-5 mb-4 border mx-5 backdrop-blur-md
+        rounded-2xl p-5 mb-4 border backdrop-blur-md mx-5
         ${cardBg} ${borderColor}
       `}
       style={{ shadowOpacity: 0.1, shadowRadius: 6 }}

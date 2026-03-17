@@ -34,7 +34,6 @@ const TeacherProfile = () => {
         if (userProfile) {
           const data = JSON.parse(userProfile);
           setUser(data);
-          
         }
       } catch (error) {
         console.error("Failed to load user:", error);
@@ -62,7 +61,11 @@ const TeacherProfile = () => {
     <SafeAreaView className="flex-1">
       {/* Background Gradient */}
       <LinearGradient
-        colors={isDarkMode ? ["#111827","#111827","#111827"] : ["#ffffff", "#ffffff", "#ffffff"]}
+        colors={
+          isDarkMode
+            ? ["#111827", "#111827", "#111827"]
+            : ["#ffffff", "#ffffff", "#ffffff"]
+        }
         style={{ flex: 1 }}
       >
         {/* Header with Glass Effect */}
@@ -106,7 +109,7 @@ const TeacherProfile = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          ): null}
+          ) : null}
         </BlurView>
 
         {/* Profile Section */}
@@ -118,21 +121,23 @@ const TeacherProfile = () => {
             className="w-32 h-32 rounded-full"
             style={{ borderWidth: 4, borderColor: borderColor }}
           />
-          <Text className="text-2xl font-semibold mt-4" style={{ color: textColor }}>
+          <Text
+            className="text-2xl font-semibold mt-4"
+            style={{ color: textColor }}
+          >
             Mr. {user?.fullname}
           </Text>
-          <Text className="text-base mt-1" style={{ color: subTextColor }}>
-            {user ? user.role : null}
+          <Text className="mt-1 text-orange-600">
+            Role: {user ? user.role : null}
           </Text>
         </View>
 
         {/* Info Cards */}
         <View className="mt-8 px-6 gap-5">
           {[
-            { label: "Experience", value: "8 Years" },
-            { label: "Subjects Taught", value: "Physics, Mathematics" },
+            { label: "Fullname", value: user.fullname },
             { label: "Email", value: user.email },
-            { label: "Contact Number", value: "+91 98765 43210" },
+            { label: "Role", value: user.role },
           ].map((item, index) => (
             <View
               key={index}
