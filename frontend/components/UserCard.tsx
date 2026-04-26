@@ -1,41 +1,99 @@
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Image, Text, useColorScheme, View } from "react-native";
 
 const UserCard = ({ userDet }: any) => {
   const theme = useColorScheme();
   const isDark = theme === "dark";
-  const bgColor = isDark ? "bg-gray-900" : "bg-gray-100";
-  const textMain = isDark ? "text-white" : "text-gray-900";
+
+  const cardBg = isDark ? "#111827" : "#ffffff";
+  const borderColor = isDark ? "#1f2937" : "#e5e7eb";
+  const textMain = isDark ? "#f9fafb" : "#111827";
+  const textSub = isDark ? "#9ca3af" : "#6b7280";
+
   return (
-    <View className="bg-white dark:bg-gray-800 p-4 rounded-2xl mb-4 flex-row items-center shadow-lg border border-neutral-200 dark:border-neutral-700">
-      <Image
-        source={{
-          uri: `https://avatar.iran.liara.run/public/boy?username=${userDet?.fullname}`,
-        }}
-        className="w-16 h-16 rounded-full mr-4 border-2 border-orange-500"
-      />
-
-      <View className="flex flex-col">
-        <View className="flex-row items-center">
-          <FontAwesome5 name="user-graduate" size={18} color="#f97316" />
-          <Text className={`ml-2 text-lg font-semibold ${textMain}`}>
-            {userDet?.fullname}
-          </Text>
+    <View
+      className="rounded-2xl mb-3 overflow-hidden"
+      style={{
+        backgroundColor: cardBg,
+        borderWidth: 1,
+        borderColor: borderColor,
+      }}
+    >
+      <View className="p-4 flex-row items-center">
+        {/* Avatar */}
+        <View
+          className="rounded-full p-[2px] mr-4"
+          style={{ borderWidth: 2, borderColor: "#f97316" }}
+        >
+          <Image
+            source={{
+              uri: `https://avatar.iran.liara.run/public/boy?username=${userDet?.fullname}`,
+            }}
+            className="w-14 h-14 rounded-full"
+          />
         </View>
 
-        <View className="flex flex-row items-center mt-1">
-          <Text className="text-sm opacity-70">
-            <Text className={`${textMain} font-medium`}>
-              ID: {userDet?._id}
+        {/* Info */}
+        <View className="flex-1">
+          <View className="flex-row items-center mb-1">
+            <FontAwesome5 name="user-graduate" size={14} color="#f97316" />
+            <Text
+              className="ml-2 text-base font-bold"
+              style={{ color: textMain }}
+              numberOfLines={1}
+            >
+              {userDet?.fullname || "Unknown"}
             </Text>
-          </Text>
+          </View>
+
+          <View className="flex-row items-center mb-0.5">
+            <MaterialCommunityIcons
+              name="email-outline"
+              size={14}
+              color={textSub}
+            />
+            <Text
+              className="ml-2 text-sm"
+              style={{ color: textSub }}
+              numberOfLines={1}
+            >
+              {userDet?.email || "—"}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <MaterialCommunityIcons
+              name="identifier"
+              size={14}
+              color={textSub}
+            />
+            <Text
+              className="ml-2 text-xs"
+              style={{ color: textSub }}
+              numberOfLines={1}
+            >
+              {userDet?._id
+                ? `${userDet._id.slice(0, 8)}...${userDet._id.slice(-4)}`
+                : "—"}
+            </Text>
+          </View>
         </View>
-        <View className="flex flex-row items-center mt-1">
-          <Text className="text-sm opacity-70">
-            <Text className={`${textMain} font-medium`}>
-              Email: {userDet?.email}
-            </Text>
+
+        {/* Role badge */}
+        <View
+          className="px-2.5 py-1 rounded-full"
+          style={{
+            backgroundColor: "rgba(249, 115, 22, 0.12)",
+          }}
+        >
+          <Text
+            className="text-xs font-semibold"
+            style={{ color: "#f97316" }}
+          >
+            {userDet?.role
+              ? userDet.role.charAt(0).toUpperCase() + userDet.role.slice(1)
+              : "Student"}
           </Text>
         </View>
       </View>

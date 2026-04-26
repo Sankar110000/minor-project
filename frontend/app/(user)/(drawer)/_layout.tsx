@@ -1,42 +1,50 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
+import { TouchableOpacity, useColorScheme } from "react-native";
 
-import { Drawer } from "expo-router/drawer";
-import { useColorScheme } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+export default function StackLayout() {
+  const theme = useColorScheme();
+  const isDark = theme === "dark";
 
-export default function DrawerLayout() {
-       const theme = useColorScheme()
+  const headerBg = isDark ? "#030712" : "#f8fafc";
+  const headerText = isDark ? "#f9fafb" : "#111827";
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer>
-        <Drawer.Screen
-          name="allAssignment"
-          options={{
-            title: "Assignments",
-            drawerIcon: ({ size }) => (
-              <Ionicons name="calendar-outline" size={size} color={"orange"} />
-            ),
-            drawerLabelStyle: {
-              color: theme==="light"?"black":"white",
-              fontWeight: "600",
-            },
-          }}
-        />
-
-        <Drawer.Screen
-          name="allClass"
-          options={{
-            title: "Classes",
-            drawerIcon: ({ size }) => (
-              <Ionicons name="book-outline" size={size} color={"orange"} />
-            ),
-            drawerLabelStyle: {
-              color: theme==="light"?"black":"white",
-              fontWeight: "600",
-            },
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: headerBg,
+        },
+        headerTintColor: headerText,
+        headerTitleStyle: {
+          fontWeight: "600",
+          fontSize: 18,
+        },
+        headerShadowVisible: false,
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mr-3"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color="#f97316"
+            />
+          </TouchableOpacity>
+        ),
+        animation: "slide_from_right",
+      }}
+    >
+      <Stack.Screen
+        name="allAssignment"
+        options={{ title: "Assignments" }}
+      />
+      <Stack.Screen
+        name="allClass"
+        options={{ title: "All Classes" }}
+      />
+    </Stack>
   );
 }

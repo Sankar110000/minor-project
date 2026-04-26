@@ -1,46 +1,110 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Text, useColorScheme, View } from "react-native";
 
-export const Card = ({ subject, maamName, time, present, title }: any) => {
+export const Card = ({ subject, maamName, time, present, title, studentCount }: any) => {
   const theme = useColorScheme();
   const isDark = theme === "dark";
 
-  // ✅ Apply same theme variables as Teacher Page UI
-  const cardBg = isDark ? "bg-white/10" : "bg-white";
-  const borderColor = isDark ? "border-white/20" : "border-gray-300";
-  const textMain = isDark ? "text-white" : "text-gray-900";
-  const textSub = isDark ? "text-gray-300" : "text-gray-600";
+  const cardBg = isDark ? "#111827" : "#ffffff";
+  const borderColor = isDark ? "#1f2937" : "#e5e7eb";
+  const textMain = isDark ? "#f9fafb" : "#111827";
+  const textSub = isDark ? "#9ca3af" : "#6b7280";
+
+  const formattedTime = time
+    ? (() => {
+        try {
+          const date = new Date(time);
+          return date.toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        } catch {
+          return time;
+        }
+      })()
+    : "—";
 
   return (
     <View
-      className={`
-        rounded-2xl p-5 mb-4 border backdrop-blur-md mx-5
-        ${cardBg} ${borderColor}
-      `}
-      style={{ shadowOpacity: 0.1, shadowRadius: 6 }}
+      className="rounded-2xl mb-4 mx-5 overflow-hidden"
+      style={{
+        backgroundColor: cardBg,
+        borderWidth: 1,
+        borderColor: borderColor,
+      }}
     >
-      {/* Subject Row */}
-      <View className="flex-row items-center mb-2">
-        <Ionicons
-          name="book-outline"
-          size={26}
-          color={isDark ? "#f97316" : "#f97316"}
-        />
-        <Text className={`ml-3 text-xl font-medium ${textMain}`}>
-          {subject}
-        </Text>
+      {/* Top accent */}
+      <View style={{ height: 3, backgroundColor: "#f97316" }} />
+
+      <View className="p-4">
+        {/* Subject Row */}
+        <View className="flex-row items-center mb-3">
+          <View
+            className="w-10 h-10 rounded-xl items-center justify-center mr-3"
+            style={{ backgroundColor: "rgba(249, 115, 22, 0.12)" }}
+          >
+            <Ionicons name="book-outline" size={20} color="#f97316" />
+          </View>
+          <View className="flex-1">
+            <Text
+              className="text-lg font-bold"
+              style={{ color: textMain }}
+              numberOfLines={1}
+            >
+              {subject || "Untitled"}
+            </Text>
+          </View>
+        </View>
+
+        {/* Details */}
+        <View className="gap-2 ml-1">
+          <View className="flex-row items-center">
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={16}
+              color={textSub}
+            />
+            <Text className="ml-2 text-sm" style={{ color: textSub }}>
+              Teacher:{" "}
+              <Text style={{ color: textMain, fontWeight: "600" }}>
+                {maamName || "—"}
+              </Text>
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <MaterialCommunityIcons
+              name="clock-outline"
+              size={16}
+              color={textSub}
+            />
+            <Text className="ml-2 text-sm" style={{ color: textSub }}>
+              Time:{" "}
+              <Text style={{ color: textMain, fontWeight: "600" }}>
+                {formattedTime}
+              </Text>
+            </Text>
+          </View>
+
+          {studentCount !== undefined && (
+            <View className="flex-row items-center">
+              <MaterialCommunityIcons
+                name="account-group-outline"
+                size={16}
+                color={textSub}
+              />
+              <Text className="ml-2 text-sm" style={{ color: textSub }}>
+                Students:{" "}
+                <Text style={{ color: "#f97316", fontWeight: "600" }}>
+                  {studentCount}
+                </Text>
+              </Text>
+            </View>
+          )}
+        </View>
       </View>
-
-      {/* Teacher */}
-      <Text className={`${textSub} text-base`}>
-        👩‍🏫 Teacher:{" "}
-        <Text className={`${textMain} font-medium`}>{maamName}</Text>
-      </Text>
-
-      {/* Time */}
-      <Text className={`${textSub} text-base mt-1`}>
-        ⏰ Time: <Text className={`${textMain} font-medium`}>{time}</Text>
-      </Text>
     </View>
   );
 };

@@ -1,70 +1,59 @@
-import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
-import { Drawer } from "expo-router/drawer";
-import { useColorScheme } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Ionicons } from "@expo/vector-icons";
+import { router, Stack } from "expo-router";
+import { TouchableOpacity, useColorScheme } from "react-native";
 
-export default function DrawerLayout() {
-const theme = useColorScheme()
+export default function StackLayout() {
+  const theme = useColorScheme();
+  const isDark = theme === "dark";
+
+  const headerBg = isDark ? "#030712" : "#f8fafc";
+  const headerText = isDark ? "#f9fafb" : "#111827";
+  const headerBorder = isDark ? "#1f2937" : "#e5e7eb";
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer>
-       
-
-        <Drawer.Screen
-          name="attendance"
-          options={{
-            title: "Attendance",
-            drawerIcon: ({ size }) => (
-              <Ionicons name="calendar-outline" size={size} color={"orange"} />
-            ),
-            drawerLabelStyle: {
-              color: theme=="dark"? "white":"black",
-              fontWeight: "600",
-            },
-          }}
-        />
-         <Drawer.Screen
-          name="viewStudent"
-          options={{
-            title: "View Student",
-            drawerIcon: ({ size }) => (
-              <FontAwesome5 name="user-graduate" size={28} color="#f97316" />
-            ),
-            drawerLabelStyle: {
-              color: theme=="dark"? "white":"black",
-              fontWeight: "600",
-            },
-          }}
-        />
-         <Drawer.Screen
-          name="previousClass"
-          options={{
-            title: "Previous Classes",
-            drawerIcon: ({ size }) => (
-              <MaterialIcons name="class" size={size} color={"orange"} />
-            ),
-            drawerLabelStyle: {
-              color: theme=="dark"? "white":"black",
-              fontWeight: "600",
-            },
-          }}
-        />
-         <Drawer.Screen
-          name="adminAssignment"
-          options={{
-            title: "Assignment",
-            drawerIcon: ({ size }) => (
-              <MaterialIcons name="assignment" size={size} color={"orange"} />
-            ),
-            drawerLabelStyle: {
-              color: theme=="dark"? "white":"black",
-              fontWeight: "600",
-            },
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: headerBg,
+        },
+        headerTintColor: headerText,
+        headerTitleStyle: {
+          fontWeight: "600",
+          fontSize: 18,
+        },
+        headerShadowVisible: false,
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="mr-3"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color="#f97316"
+            />
+          </TouchableOpacity>
+        ),
+        animation: "slide_from_right",
+      }}
+    >
+      <Stack.Screen
+        name="attendance"
+        options={{ title: "Attendance" }}
+      />
+      <Stack.Screen
+        name="viewStudent"
+        options={{ title: "Students" }}
+      />
+      <Stack.Screen
+        name="previousClass"
+        options={{ title: "Previous Classes" }}
+      />
+      <Stack.Screen
+        name="adminAssignment"
+        options={{ title: "Assignments" }}
+      />
+    </Stack>
   );
 }
