@@ -6,7 +6,6 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { Redirect, Stack } from "expo-router";
-import * as ScreenCapture from "expo-screen-capture";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -24,16 +23,7 @@ export default function RootLayout() {
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    ScreenCapture.preventScreenCaptureAsync();
-    const sub = ScreenCapture.addScreenshotListener(() => {
-      Alert.alert("Screenshots are not allowed!");
-    });
-    return () => {
-      sub.remove();
-      ScreenCapture.allowScreenCaptureAsync();
-    };
-  }, []);
+
 
   useEffect(() => {
     const loadAuthData = async () => {

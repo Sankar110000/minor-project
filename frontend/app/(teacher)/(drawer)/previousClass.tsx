@@ -1,6 +1,7 @@
 import { Card } from "@/components/Card";
 import { BASE_URL } from "@/components/config";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import PageHeader from "@/components/PageHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -54,18 +55,12 @@ const PreviousClass = () => {
   return (
     <View className={`${bgColor} flex-1`}>
       {/* Header */}
-      <View className="px-5 pt-4 pb-2">
-        <View className="flex-row items-center mb-1">
-          <MaterialIcons name="class" size={24} color="#f97316" />
-          <Text className={`text-2xl font-bold ml-3 ${textMain}`}>
-            Previous Classes
-          </Text>
-        </View>
-        <Text className={`text-sm mb-2 ${textSub}`}>
-          {classData.length}{" "}
-          {classData.length === 1 ? "class" : "classes"} conducted
-        </Text>
-      </View>
+      <PageHeader 
+        title="Previous Classes" 
+        subtitle={`${classData.length} ${classData.length === 1 ? "class" : "classes"} conducted`}
+        iconName="class"
+        iconType="MaterialIcons"
+      />
 
       {loading ? (
         <View className="flex-1 justify-center items-center">

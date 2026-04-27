@@ -143,7 +143,13 @@ export default function UserProfile() {
           className="px-5 py-4 flex-row justify-between items-center"
           style={{ borderBottomWidth: 1, borderBottomColor: borderColor }}
         >
-          <View className="w-10 h-10" />
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-10 h-10 rounded-full items-center justify-center"
+            style={{ backgroundColor: surfaceBg }}
+          >
+            <Ionicons name="chevron-back" size={22} color={textMain} />
+          </TouchableOpacity>
 
           <Text
             className="text-lg font-semibold"

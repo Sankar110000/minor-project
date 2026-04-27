@@ -23,7 +23,7 @@ export default function StackLayout() {
         headerShadowVisible: false,
         headerLeft: () => (
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => router.push('/(user)')}
             className="mr-3"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PageHeader from "@/components/PageHeader";
 import {
   View,
   Text,
@@ -140,17 +141,12 @@ export default function AdminAssignment() {
   return (
     <View className={`flex-1 ${bgColor}`}>
       {/* Header */}
-      <View className="px-5 pt-4 pb-2">
-        <View className="flex-row items-center mb-1">
-          <MaterialIcons name="assignment" size={24} color="#f97316" />
-          <Text className={`text-2xl font-bold ml-3 ${textMain}`}>
-            Assignments
-          </Text>
-        </View>
-        <Text className={`text-sm mb-2 ${textSub}`}>
-          {assignments.length} total assignments
-        </Text>
-      </View>
+      <PageHeader 
+        title="Assignments" 
+        subtitle={`${assignments.length} total assignments`}
+        iconName="assignment"
+        iconType="MaterialIcons"
+      />
 
       {/* Summary Stats */}
       <View className="flex-row px-5 mb-4 gap-3">

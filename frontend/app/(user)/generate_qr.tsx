@@ -7,6 +7,8 @@ import { CameraView } from "expo-camera";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,6 +22,8 @@ const GenerateQR = () => {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const [barCodeScanned, setBarCodeScanned] = useState(false);
   const [barCodeData, setBarCodeData] = useState();
   const [classData, setClassData] = useState<any>();
@@ -30,6 +34,13 @@ const GenerateQR = () => {
   const textSub = isDark ? "#9ca3af" : "#6b7280";
   const cardBg = isDark ? "#111827" : "#ffffff";
   const borderColor = isDark ? "#1f2937" : "#e5e7eb";
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchCurrClass();
+    setRefreshing(false);
+  };
+
 
   const onScanned = async ({ data }: { data: any }) => {
     try {
@@ -78,33 +89,35 @@ const GenerateQR = () => {
     }
   };
 
-  useEffect(() => {
-    async function fetchCurrClass() {
-      try {
-        const clasString = await AsyncStorage.getItem("currClass");
-        if (!clasString) {
-          return;
-        }
-        const classData = JSON.parse(clasString);
-        console.log(classData._id);
-        const res = await axios.get(
-          `${BASE_URL}/api/class/getClassById?classId=${classData?._id}`,
-        );
-        if (res.data?.success) {
-          if (new Date(Date.now()) >= new Date(res.data.class.endTime)) {
-            console.log("Called");
-            setIsClassEnded(true);
-            await AsyncStorage.removeItem("currClass");
-          } else {
-            setClassData(res.data?.class);
-          }
-        }
-      } catch (error) {
-        console.log("Error while feching useing useEffect: ", error);
+  async function fetchCurrClass() {
+    try {
+      const clasString = await AsyncStorage.getItem("currClass");
+      if (!clasString) {
+        return;
       }
+      const classData = JSON.parse(clasString);
+      console.log(classData._id);
+      const res = await axios.get(
+        `${BASE_URL}/api/class/getClassById?classId=${classData?._id}`,
+      );
+      if (res.data?.success) {
+        if (new Date(Date.now()) >= new Date(res.data.class.endTime)) {
+          console.log("Called");
+          setIsClassEnded(true);
+          await AsyncStorage.removeItem("currClass");
+        } else {
+          setClassData(res.data?.class);
+        }
+      }
+    } catch (error) {
+      console.log("Error while feching useing useEffect: ", error);
     }
+  }
+  useEffect(() => {
     fetchCurrClass();
   }, []);
+
+
 
   // ──── Camera / Scanner View ────
   if (!classData) {
@@ -146,8 +159,23 @@ const GenerateQR = () => {
 
   // ──── Class Info View (after scanning) ────
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: bgColor }}>
-      <View className="flex-1 items-center justify-center px-5">
+    <SafeAreaView style={{ flex: 1, backgroundColor: bgColor }} >
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#f97316"
+          />
+        }
+        className="flex-1"
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 20,
+        }}
+      >
         {/* Success badge */}
         <View
           className="w-20 h-20 rounded-full items-center justify-center mb-6"
@@ -203,7 +231,7 @@ const GenerateQR = () => {
             Scan Again
           </Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

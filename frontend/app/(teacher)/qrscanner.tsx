@@ -7,14 +7,17 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
+import * as ScreenCapture from "expo-screen-capture";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
   Modal,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -38,6 +41,7 @@ export default function RandomQRCode() {
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [currClass, setCurrClass] = useState<{
     title: string;
     _id: string;
@@ -188,16 +192,46 @@ export default function RandomQRCode() {
     }
   }
 
+  const refreshAttendance = async () => {
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      const user = userString ? JSON.parse(userString) : null;
+      if (!user?._id) return;
+
+      const res = await axios.post(`${BASE_URL}/api/class/getCurrClass`, {
+        teacherID: user._id,
+      });
+      if (res.data.success) {
+        setCurrClass(res.data.currClass);
+      }
+    } catch (error) {
+      console.log("Error refreshing attendance:", error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshAttendance();
+    setRefreshing(false);
+  };
+
   const handleTitleChange = (e: any) => {
     setTitle(e);
   };
 
-  // 🔹 useEffect (FUNCTIONALITY - UNTOUCHED)
   useEffect(() => {
     getData();
-    if (isQrGenerated) {
-      const tokenInterval = setInterval(() => {
+  }, []);
+
+  useEffect(() => {
+    let tokenInterval: NodeJS.Timeout;
+    let attendanceInterval: NodeJS.Timeout;
+
+    if (classOnGoing || isQrGenerated) {
+      // Refresh QR token every 2 seconds
+      tokenInterval = setInterval(() => {
         setQrValue((prev) => {
+          if (!prev) return prev;
           return {
             ...prev,
             token: generateRandomValue(),
@@ -205,9 +239,31 @@ export default function RandomQRCode() {
           };
         });
       }, 2000);
-      return () => clearInterval(tokenInterval);
+
+      // Refresh attendance data every 5 seconds
+      attendanceInterval = setInterval(() => {
+        refreshAttendance();
+      }, 5000);
     }
+
+    return () => {
+      if (tokenInterval) clearInterval(tokenInterval);
+      if (attendanceInterval) clearInterval(attendanceInterval);
+    };
   }, [isQrGenerated, classOnGoing]);
+
+  useFocusEffect(
+    useCallback(() => {
+      ScreenCapture.preventScreenCaptureAsync();
+      const sub = ScreenCapture.addScreenshotListener(() => {
+        Alert.alert("Screenshots are not allowed!");
+      });
+      return () => {
+        sub.remove();
+        ScreenCapture.allowScreenCaptureAsync();
+      };
+    }, [])
+  );
 
   if (pageLoading) {
     return (
@@ -231,6 +287,13 @@ export default function RandomQRCode() {
           paddingBottom: 40,
           flexGrow: 1,
         }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#f97316"
+          />
+        }
       >
         {/* ──── Header ──── */}
         <View className="px-5 pt-4 pb-2">
@@ -440,6 +503,72 @@ export default function RandomQRCode() {
                 </Text>
               </View>
             </TouchableOpacity>
+
+            {/* ──── Student List ──── */}
+            <View className="w-full mt-8">
+              <View className="flex-row items-center justify-between mb-4">
+                <Text className="text-lg font-bold" style={{ color: textMain }}>
+                  Students Present ({currClass.total_students?.length || 0})
+                </Text>
+              </View>
+
+              {currClass.total_students && currClass.total_students.length > 0 ? (
+                <View
+                  className="rounded-2xl overflow-hidden"
+                  style={{
+                    backgroundColor: cardBg,
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                  }}
+                >
+                  {currClass.total_students.map((student: any, index: number) => (
+                    <View
+                      key={index}
+                      className={`flex-row items-center px-4 py-3 ${index < currClass.total_students.length - 1 ? "border-b" : ""
+                        }`}
+                      style={{ borderBottomColor: borderColor }}
+                    >
+                      <View
+                        className="w-8 h-8 rounded-full items-center justify-center mr-3"
+                        style={{ backgroundColor: "#f97316" + "20" }}
+                      >
+                        <Text className="text-xs font-bold" style={{ color: "#f97316" }}>
+                          {index + 1}
+                        </Text>
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-sm font-semibold" style={{ color: textMain }}>
+                          {student.fullname || "Anonymous Student"}
+                        </Text>
+                        <Text className="text-xs" style={{ color: textSub }}>
+                          {student.email || "No email available"}
+                        </Text>
+                      </View>
+                      <Ionicons name="checkmark-circle" size={18} color="#22c55e" />
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View
+                  className="rounded-2xl p-8 items-center justify-center"
+                  style={{
+                    backgroundColor: cardBg,
+                    borderWidth: 1,
+                    borderColor: borderColor,
+                    borderStyle: "dashed",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="account-search-outline"
+                    size={40}
+                    color={textSub}
+                  />
+                  <Text className="mt-3 text-sm text-center" style={{ color: textSub }}>
+                    Waiting for students to scan...
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         ) : (
           /* ──── Empty State / Start New Class ──── */

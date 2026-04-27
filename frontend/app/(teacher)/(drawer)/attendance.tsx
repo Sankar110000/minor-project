@@ -1,6 +1,7 @@
 import { BASE_URL } from "@/components/config";
 import UserCard from "@/components/UserCard";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import PageHeader from "@/components/PageHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -72,19 +73,12 @@ const Attendance = () => {
   return (
     <View className={`${bgColor} flex-1`}>
       {/* Header */}
-      <View className="px-5 pt-4 pb-2">
-        <View className="flex-row items-center mb-1">
-          <Ionicons name="calendar-outline" size={22} color="#f97316" />
-          <Text className={`text-2xl font-bold ml-3 ${textMain}`}>
-            Attendance
-          </Text>
-        </View>
-        {className ? (
-          <Text className={`text-sm ${textSub}`}>
-            Current class: <Text className="font-semibold text-orange-500">{className}</Text>
-          </Text>
-        ) : null}
-      </View>
+      <PageHeader 
+        title="Attendance" 
+        subtitle={className ? `Current class: ${className}` : undefined}
+        iconName="calendar-outline"
+        iconType="Ionicons"
+      />
 
       {/* Stats Bar */}
       {presentStu.length > 0 && (
