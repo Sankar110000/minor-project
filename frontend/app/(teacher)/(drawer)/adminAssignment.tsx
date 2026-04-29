@@ -141,12 +141,11 @@ export default function AdminAssignment() {
   return (
     <View className={`flex-1 ${bgColor}`}>
       {/* Header */}
-      <PageHeader 
-        title="Assignments" 
-        subtitle={`${assignments.length} total assignments`}
-        iconName="assignment"
-        iconType="MaterialIcons"
-      />
+      <View className="px-5 pt-2 pb-4">
+        <Text className={`text-sm ${textSub}`}>
+          {`${assignments.length} total assignments`}
+        </Text>
+      </View>
 
       {/* Summary Stats */}
       <View className="flex-row px-5 mb-4 gap-3">

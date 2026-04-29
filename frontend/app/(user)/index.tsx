@@ -67,15 +67,59 @@ export default function StudentHome() {
     }
   };
 
+  const fetchTodayClasses = async () => {
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      const userData = userString ? JSON.parse(userString) : null;
+
+      // Attempt 1: Fetch with studentID
+      let res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {
+        studentID: userData?._id
+      });
+      
+      let classes = [];
+      if (res.data.success && res.data.classes?.length > 0) {
+        classes = res.data.classes;
+      } else {
+        // Attempt 2: Fetch with empty body
+        res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {});
+        if (res.data.success) {
+          classes = res.data.classes || res.data.data || [];
+        }
+      }
+
+      const todayStr = new Date().toDateString();
+      const filtered = classes.filter((c: any) => {
+        const classDate = new Date(c.startTime).toDateString();
+        return classDate === todayStr;
+      });
+      
+      // Map to include presence status
+      const withStatus = filtered.map((c: any) => ({
+        ...c,
+        present: c.total_students?.some((s: any) => {
+          const sId = typeof s === 'string' ? s : s._id;
+          return sId === userData?._id;
+        }),
+      })).reverse();
+      
+      setTodayClasses(withStatus);
+    } catch (error) {
+      console.log("Error fetching today's classes:", error);
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     await fetchUserData();
+    await fetchTodayClasses();
     setLoading(false);
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchUserData();
+    await fetchTodayClasses();
     setRefreshing(false);
   };
 
@@ -283,21 +327,75 @@ export default function StudentHome() {
           />
         </View>
 
-        <View
-          className={`${cardBg} rounded-2xl border ${borderColor} p-5 items-center`}
-        >
-          <MaterialCommunityIcons
-            name="school-outline"
-            size={48}
-            color={isDark ? "#4b5563" : "#d1d5db"}
-          />
-          <Text className={`${textSub} text-base mt-3 text-center`}>
-            No classes scheduled for today
-          </Text>
-          <Text className={`${textSub} text-sm mt-1 text-center`}>
-            Your upcoming classes will appear here.
-          </Text>
-        </View>
+        {todayClasses.length > 0 ? (
+          <View>
+            {todayClasses.map((activity, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => router.push("/(user)/(drawer)/allClass")}
+                activeOpacity={0.8}
+                className={`${cardBg} rounded-2xl border ${borderColor} p-4 mb-3 flex-row items-center`}
+              >
+                <View
+                  className="w-12 h-12 rounded-xl items-center justify-center mr-4"
+                  style={{ 
+                    backgroundColor: activity.present 
+                      ? "rgba(34, 197, 94, 0.12)" 
+                      : "rgba(249, 115, 22, 0.12)" 
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name={activity.present ? "calendar-check" : "calendar-clock"}
+                    size={24}
+                    color={activity.present ? "#22c55e" : "#f97316"}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className={`${textMain} font-semibold text-base`}>
+                    {activity.title}
+                  </Text>
+                  <Text className={`${textSub} text-xs mt-0.5`}>
+                    {new Date(activity.startTime).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })} • {activity.classTeacher?.fullname || "Teacher"}
+                  </Text>
+                </View>
+                <View
+                  className="px-3 py-1 rounded-full"
+                  style={{
+                    backgroundColor: activity.present
+                      ? "rgba(34, 197, 94, 0.12)"
+                      : "rgba(249, 115, 22, 0.12)",
+                  }}
+                >
+                  <Text
+                    className="text-[10px] font-bold"
+                    style={{ color: activity.present ? "#22c55e" : "#f97316" }}
+                  >
+                    {activity.present ? "PRESENT" : "SCHEDULED"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View
+            className={`${cardBg} rounded-2xl border ${borderColor} p-5 items-center`}
+          >
+            <MaterialCommunityIcons
+              name="school-outline"
+              size={48}
+              color={isDark ? "#4b5563" : "#d1d5db"}
+            />
+            <Text className={`${textSub} text-base mt-3 text-center`}>
+              No classes scheduled for today
+            </Text>
+            <Text className={`${textSub} text-sm mt-1 text-center`}>
+              Your upcoming classes will appear here.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

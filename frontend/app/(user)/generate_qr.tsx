@@ -67,6 +67,7 @@ const GenerateQR = () => {
         const res = await axios.post(`${BASE_URL}/api/user/markAttendance`, {
           classID: scannedData?._id,
           studentID: user._id,
+          token: scannedData?.token,
         });
         console.log("Response data", res.data);
         if (res.data.success) {

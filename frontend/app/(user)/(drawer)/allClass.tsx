@@ -1,51 +1,85 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, useColorScheme } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, useColorScheme, ActivityIndicator, RefreshControl } from "react-native";
 import { Card } from "@/components/Card";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-const classData = [
-  {
-    id: "1",
-    maamName: "Mrs. Smith",
-    subject: "Math",
-    time: "9:00 AM",
-    present: false,
-    title: "Absent",
-  },
-  {
-    id: "2",
-    maamName: "Ms. Johnson",
-    subject: "Science",
-    time: "10:00 AM",
-    present: true,
-    title: "Present",
-  },
-  {
-    id: "3",
-    maamName: "Mrs. Lee",
-    subject: "History",
-    time: "11:00 AM",
-    present: false,
-    title: "Absent",
-  },
-  {
-    id: "4",
-    maamName: "Mr. Khan",
-    subject: "Computer Science",
-    time: "02:00 PM",
-    present: true,
-    title: "Present",
-  },
-];
+import axios from "axios";
+import { BASE_URL } from "@/components/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AllClass() {
-  const [classes, setClasses] = useState(classData);
+  const [classes, setClasses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
   const bgColor = isDark ? "bg-gray-950" : "bg-gray-50";
   const textMain = isDark ? "text-white" : "text-gray-900";
   const textSub = isDark ? "text-gray-400" : "text-gray-500";
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const userString = await AsyncStorage.getItem("user");
+      const userData = userString ? JSON.parse(userString) : null;
+      setUser(userData);
+
+      console.log("Fetching classes for student:", userData?._id);
+      
+      // Attempt 1: Fetch using getPrevoiusClass. 
+      // We try passing studentID just in case the backend supports it.
+      let res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {
+        studentID: userData?._id
+      });
+      
+      let classList = [];
+      if (res.data.success && res.data.classes?.length > 0) {
+        classList = res.data.classes;
+      } else {
+        // Attempt 2: Fetch with empty body (as originally tried)
+        res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {});
+        if (res.data.success) {
+          classList = res.data.classes || res.data.data || [];
+        }
+      }
+
+      console.log("Classes found after attempts:", classList.length);
+
+      const formattedClasses = classList.map((c: any) => {
+        // Check presence
+        const isPresent = c.total_students?.some((s: any) => {
+          const sId = typeof s === 'string' ? s : s._id;
+          return sId === userData?._id;
+        });
+
+        return {
+          id: c._id,
+          maamName: c.classTeacher?.fullname || "Teacher",
+          subject: c.title || "Untitled Class",
+          time: c.startTime,
+          present: isPresent,
+        };
+      }).reverse();
+
+      setClasses(formattedClasses);
+    } catch (error: any) {
+      console.log("Error fetching classes:", error.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <View className={`flex-1 ${bgColor}`}>
@@ -106,21 +140,40 @@ export default function AllClass() {
         </View>
       </View>
 
-      <FlatList
-        data={classes}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, paddingTop: 8 }}
-        renderItem={({ item }) => (
-          <Card
-            maamName={item.maamName}
-            subject={item.subject}
-            time={item.time}
-            present={item.present}
-            title={item.title}
-          />
-        )}
-      />
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#f97316" />
+        </View>
+      ) : (
+        <FlatList
+          data={classes}
+          keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#f97316"
+            />
+          }
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20, paddingTop: 8 }}
+          renderItem={({ item }) => (
+            <Card
+              maamName={item.maamName}
+              subject={item.subject}
+              time={item.time}
+              present={item.present}
+              title={item.present ? "Present" : "Absent"}
+            />
+          )}
+          ListEmptyComponent={
+            <View className="items-center justify-center py-20">
+              <MaterialCommunityIcons name="calendar-remove-outline" size={48} color={textSub} />
+              <Text className={`mt-4 ${textSub}`}>No class history available</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }

@@ -1,23 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   FlatList,
   useColorScheme,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-
-const assignmentsData = [
-  { id: "1", title: "Math Homework", completed: true, dueDate: "Apr 20, 2026" },
-  { id: "2", title: "Science Project", completed: false, dueDate: "Apr 28, 2026" },
-  { id: "3", title: "English Essay", completed: true, dueDate: "Apr 22, 2026" },
-  { id: "4", title: "Computer Assignment", completed: false, dueDate: "Apr 30, 2026" },
-  { id: "5", title: "Physics Notes", completed: true, dueDate: "Apr 24, 2026" },
-];
+import axios from "axios";
+import { BASE_URL } from "@/components/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AllAssignment() {
-  const [assignments, setAssignments] = useState(assignmentsData);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
@@ -26,6 +26,29 @@ export default function AllAssignment() {
   const borderColor = isDark ? "#1f2937" : "#e5e7eb";
   const textMain = isDark ? "text-white" : "text-gray-900";
   const textSub = isDark ? "text-gray-400" : "text-gray-500";
+
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/assignment/getAll`);
+      if (res.data.success) {
+        setAssignments(res.data.assignments);
+      }
+    } catch (error) {
+      console.log("Error fetching assignments:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchAssignments();
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
 
   const renderItem = ({ item }: any) => (
     <TouchableOpacity activeOpacity={0.85} className="mb-3">
@@ -153,13 +176,32 @@ export default function AllAssignment() {
         </View>
       </View>
 
-      <FlatList
-        data={assignments}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, paddingTop: 8 }}
-      />
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#f97316" />
+        </View>
+      ) : (
+        <FlatList
+          data={assignments}
+          keyExtractor={(item) => item._id || item.id}
+          renderItem={renderItem}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#f97316"
+            />
+          }
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, paddingTop: 8 }}
+          ListEmptyComponent={
+            <View className="items-center justify-center py-20">
+              <MaterialCommunityIcons name="clipboard-text-off-outline" size={48} color={textSub} />
+              <Text className={`mt-4 ${textSub}`}>No assignments assigned yet</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }

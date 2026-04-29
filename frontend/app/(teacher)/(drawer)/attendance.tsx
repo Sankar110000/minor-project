@@ -73,12 +73,13 @@ const Attendance = () => {
   return (
     <View className={`${bgColor} flex-1`}>
       {/* Header */}
-      <PageHeader 
-        title="Attendance" 
-        subtitle={className ? `Current class: ${className}` : undefined}
-        iconName="calendar-outline"
-        iconType="Ionicons"
-      />
+      {className ? (
+        <View className="px-5 pt-2 pb-4">
+          <Text className={`text-sm ${textSub}`}>
+            {`Current class: ${className}`}
+          </Text>
+        </View>
+      ) : null}
 
       {/* Stats Bar */}
       {presentStu.length > 0 && (

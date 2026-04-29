@@ -55,12 +55,11 @@ const PreviousClass = () => {
   return (
     <View className={`${bgColor} flex-1`}>
       {/* Header */}
-      <PageHeader 
-        title="Previous Classes" 
-        subtitle={`${classData.length} ${classData.length === 1 ? "class" : "classes"} conducted`}
-        iconName="class"
-        iconType="MaterialIcons"
-      />
+      <View className="px-5 pt-2 pb-4">
+        <Text className={`text-sm ${textSub}`}>
+          {`${classData.length} ${classData.length === 1 ? "class" : "classes"} conducted`}
+        </Text>
+      </View>
 
       {loading ? (
         <View className="flex-1 justify-center items-center">

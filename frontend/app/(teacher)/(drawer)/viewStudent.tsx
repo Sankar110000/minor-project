@@ -72,11 +72,11 @@ const ViewStudent = () => {
   return (
     <View className={`flex-1 ${bgColor}`}>
       {/* Search + Header */}
-      <PageHeader 
-        title="All Students" 
-        subtitle={`${filteredStudents.length} ${filteredStudents.length === 1 ? "student" : "students"} enrolled`}
-        iconName="user-graduate"
-      />
+      <View className="px-5 pt-2 pb-4">
+        <Text className={`text-sm ${textSub}`}>
+          {`${filteredStudents.length} ${filteredStudents.length === 1 ? "student" : "students"} enrolled`}
+        </Text>
+      </View>
       <View className="px-5">
 
         {/* Search Bar */}

@@ -36,7 +36,7 @@ export default function RandomQRCode() {
   const [isQrGenerated, setIsQrGenerated] = useState(false);
   const [classOnGoing, setClassOnGoing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("");
   const [time, setTime] = useState(new Date(Date.now()));
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -104,14 +104,15 @@ export default function RandomQRCode() {
 
       const res = await axios.post(`${BASE_URL}/api/class/create`, body);
       if (res.data.success) {
+        const classInfo = res.data.savedClass;
         setQrValue({
-          _id: res.data._id,
-          title: res.data.title,
-          classTeacher: res.data.classTeacher,
-          startTime: res.data.startTime,
-          endTime: res.data.endTime,
+          _id: classInfo._id,
+          title: classInfo.title,
+          classTeacher: classInfo.classTeacher,
+          startTime: classInfo.startTime,
+          endTime: classInfo.endTime,
           token: generateRandomValue(),
-          expiry: Date.now() + 5 * 1000,
+          expiry: Date.now() + 15 * 1000,
         });
         setIsQrGenerated(true);
         setClassOnGoing(true);
@@ -176,7 +177,7 @@ export default function RandomQRCode() {
         setQrValue({
           ...res.data.currClass,
           token: generateRandomValue(),
-          expiry: new Date(Date.now() + 5 * 1000),
+          expiry: Date.now() + 15 * 1000,
         });
         setCurrClass(res.data.currClass);
         setClassOnGoing(true);
@@ -235,7 +236,7 @@ export default function RandomQRCode() {
           return {
             ...prev,
             token: generateRandomValue(),
-            expiry: Date.now() + 5 * 1000,
+            expiry: Date.now() + 30 * 1000,
           };
         });
       }, 2000);

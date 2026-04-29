@@ -35,6 +35,7 @@ const Index = () => {
     attendanceRate: 0,
     assignments: 0,
   });
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
 
   // Dynamic colors based on mode
   const bgColor = isDark ? "bg-gray-950" : "bg-gray-50";
@@ -87,6 +88,7 @@ const Index = () => {
             ...prev,
             classesToday: todayClasses.length,
           }));
+          setRecentActivities(classes.slice(-3).reverse());
         }
       }
     } catch (error) {
@@ -390,21 +392,71 @@ const Index = () => {
           />
         </View>
 
-        <View
-          className={`${cardBg} rounded-2xl border ${borderColor} p-5 items-center`}
-        >
-          <MaterialCommunityIcons
-            name="clipboard-text-clock-outline"
-            size={48}
-            color={isDark ? "#4b5563" : "#d1d5db"}
-          />
-          <Text className={`${textSub} text-base mt-3 text-center`}>
-            Your recent activity will appear here.
-          </Text>
-          <Text className={`${textSub} text-sm mt-1 text-center`}>
-            Start a class or manage assignments to see updates.
-          </Text>
-        </View>
+        {recentActivities.length > 0 ? (
+          <View>
+            {recentActivities.map((activity, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => router.push("/(teacher)/(drawer)/previousClass")}
+                activeOpacity={0.8}
+                className={`${cardBg} rounded-2xl border ${borderColor} p-4 mb-3 flex-row items-center`}
+              >
+                <View
+                  className="w-12 h-12 rounded-xl items-center justify-center mr-4"
+                  style={{ backgroundColor: "rgba(249, 115, 22, 0.12)" }}
+                >
+                  <MaterialCommunityIcons
+                    name="book-check-outline"
+                    size={24}
+                    color="#f97316"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className={`${textMain} font-semibold text-base`}>
+                    {activity.title}
+                  </Text>
+                  <Text className={`${textSub} text-xs mt-0.5`}>
+                    {new Date(activity.startTime).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </View>
+                <View className="items-end">
+                  <Text className="text-orange-500 font-bold text-sm">
+                    {activity.total_students?.length || 0}
+                  </Text>
+                  <Text className={`${textSub} text-[10px]`}>Students</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity 
+              onPress={() => router.push("/(teacher)/(drawer)/previousClass")}
+              className="py-2 items-center"
+            >
+              <Text className="text-orange-500 font-semibold text-sm">View All Activities</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View
+            className={`${cardBg} rounded-2xl border ${borderColor} p-5 items-center`}
+          >
+            <MaterialCommunityIcons
+              name="clipboard-text-clock-outline"
+              size={48}
+              color={isDark ? "#4b5563" : "#d1d5db"}
+            />
+            <Text className={`${textSub} text-base mt-3 text-center`}>
+              Your recent activity will appear here.
+            </Text>
+            <Text className={`${textSub} text-sm mt-1 text-center`}>
+              Start a class or manage assignments to see updates.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
