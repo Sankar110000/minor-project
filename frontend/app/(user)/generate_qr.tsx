@@ -4,7 +4,9 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { CameraView } from "expo-camera";
-import React, { useEffect, useState } from "react";
+import * as Location from "expo-location";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
 import {
   Alert,
   RefreshControl,
@@ -29,11 +31,32 @@ const GenerateQR = () => {
   const [classData, setClassData] = useState<any>();
   const [isClassEnded, setIsClassEnded] = useState(false);
 
+  // Ref to prevent duplicate scan processing
+  const isProcessingScan = useRef(false);
+
   const bgColor = isDark ? "#030712" : "#f8fafc";
   const textMain = isDark ? "#f9fafb" : "#111827";
   const textSub = isDark ? "#9ca3af" : "#6b7280";
   const cardBg = isDark ? "#111827" : "#ffffff";
   const borderColor = isDark ? "#1f2937" : "#e5e7eb";
+
+  // Anti-proxy: maximum allowed distance in meters between student and teacher
+  const MAX_DISTANCE_METERS = 100;
+
+  // Haversine formula to calculate distance between two GPS coordinates
+  function getDistanceMeters(
+    lat1: number, lng1: number,
+    lat2: number, lng2: number
+  ): number {
+    const R = 6371e3; // Earth radius in meters
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -41,52 +64,121 @@ const GenerateQR = () => {
     setRefreshing(false);
   };
 
+  // Reset state when screen gains focus — so after teacher ends class,
+  // student sees the scanner again on next visit / refresh
+  useFocusEffect(
+    useCallback(() => {
+      fetchCurrClass();
+    }, [])
+  );
 
   const onScanned = async ({ data }: { data: any }) => {
+    // Prevent duplicate processing using ref (state is async and unreliable here)
+    if (isProcessingScan.current || barCodeScanned) {
+      return;
+    }
+    isProcessingScan.current = true;
+
     try {
       const userData = await AsyncStorage.getItem("user");
 
       if (!userData) {
+        isProcessingScan.current = false;
         return;
       }
       const user = JSON.parse(userData);
       const scannedData = JSON.parse(data);
 
       console.log("Type of end time", typeof scannedData.endTime);
-      const now = new Date(Date.now());
-      const expiry = new Date(scannedData?.expiry);
-      console.log("Date now", now.toTimeString());
-      console.log("End time", expiry.toTimeString());
+      const now = Date.now();
+      const expiry = scannedData?.expiry;
+      console.log("Date now", new Date(now).toTimeString());
+      console.log("Expiry", new Date(expiry).toTimeString());
+
       if (now > expiry) {
         Alert.alert("QR Expired", "This QR code has expired. Please ask your teacher to refresh.");
+        isProcessingScan.current = false;
         return;
       }
-      setClassData(scannedData);
-      setBarCodeScanned(true);
-      if (!barCodeScanned) {
-        const res = await axios.post(`${BASE_URL}/api/user/markAttendance`, {
-          classID: scannedData?._id,
-          studentID: user._id,
-          token: scannedData?.token,
-        });
-        console.log("Response data", res.data);
-        if (res.data.success) {
-          await AsyncStorage.setItem(
-            "currClass",
-            JSON.stringify(res.data?.currClass),
+
+      // ── Anti-proxy: GPS proximity check ──
+      if (scannedData?.loc) {
+        try {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "Location Required",
+              "Please enable location permission to mark attendance. This prevents proxy attendance."
+            );
+            isProcessingScan.current = false;
+            return;
+          }
+          const studentLoc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High,
+          });
+          const distance = getDistanceMeters(
+            scannedData.loc.lat,
+            scannedData.loc.lng,
+            studentLoc.coords.latitude,
+            studentLoc.coords.longitude
           );
+          console.log(`Distance from teacher: ${distance.toFixed(1)}m`);
+          if (distance > MAX_DISTANCE_METERS) {
+            Alert.alert(
+              "Proxy Detected 🚫",
+              `You must be within ${MAX_DISTANCE_METERS}m of the classroom to mark attendance. You are ${Math.round(distance)}m away.`
+            );
+            isProcessingScan.current = false;
+            return;
+          }
+        } catch (locErr) {
+          console.log("Location check error:", locErr);
           Alert.alert(
-            "Attendance Marked ✅",
-            "Your attendance has been recorded successfully!",
-            [{ style: "destructive" }],
+            "Location Error",
+            "Could not verify your location. Please ensure GPS is enabled and try again."
           );
-        } else {
-          Alert.alert("Error", "Failed to mark attendance. Please try again.");
+          isProcessingScan.current = false;
+          return;
         }
       }
-      return;
+
+      setBarCodeScanned(true);
+      setClassData(scannedData);
+
+      const res = await axios.post(`${BASE_URL}/api/user/markAttendance`, {
+        classID: scannedData?._id,
+        studentID: user._id,
+        token: scannedData?.token,
+      });
+      console.log("Response data", res.data);
+      if (res.data.success) {
+        await AsyncStorage.setItem(
+          "currClass",
+          JSON.stringify(res.data?.currClass),
+        );
+        // Fetch the full class data (with populated classTeacher) so the Card shows correctly
+        try {
+          const classRes = await axios.get(
+            `${BASE_URL}/api/class/getClassById?classId=${scannedData._id}`,
+          );
+          if (classRes.data?.success) {
+            setClassData(classRes.data.class);
+          }
+        } catch (e) {
+          console.log("Error fetching full class data after scan:", e);
+        }
+        Alert.alert(
+          "Attendance Marked ✅",
+          "Your attendance has been recorded successfully!",
+          [{ style: "destructive" }],
+        );
+      } else {
+        Alert.alert("Error", res.data?.message || "Failed to mark attendance. Please try again.");
+      }
     } catch (error) {
       console.log("Error while scanning the QR: ", error);
+      isProcessingScan.current = false;
+      setBarCodeScanned(false);
     }
   };
 
@@ -94,30 +186,54 @@ const GenerateQR = () => {
     try {
       const clasString = await AsyncStorage.getItem("currClass");
       if (!clasString) {
+        // No saved class — reset to scanner view
+        setClassData(undefined);
+        setBarCodeScanned(false);
+        isProcessingScan.current = false;
+        setIsClassEnded(false);
         return;
       }
-      const classData = JSON.parse(clasString);
-      console.log(classData._id);
+      const savedClass = JSON.parse(clasString);
+      console.log(savedClass._id);
       const res = await axios.get(
-        `${BASE_URL}/api/class/getClassById?classId=${classData?._id}`,
+        `${BASE_URL}/api/class/getClassById?classId=${savedClass?._id}`,
       );
       if (res.data?.success) {
-        if (new Date(Date.now()) >= new Date(res.data.class.endTime)) {
-          console.log("Called");
+        const classInfo = res.data.class;
+        // Check if the class has ended (endTime passed OR class is marked as ended)
+        const classEnded = classInfo.isEnded === true ||
+          new Date(Date.now()) >= new Date(classInfo.endTime);
+
+        if (classEnded) {
+          console.log("Class ended — resetting to scanner");
           setIsClassEnded(true);
+          setClassData(undefined);
+          setBarCodeScanned(false);
+          isProcessingScan.current = false;
           await AsyncStorage.removeItem("currClass");
         } else {
-          setClassData(res.data?.class);
+          setClassData(classInfo);
+          setBarCodeScanned(true);
         }
+      } else {
+        // Class not found — it was probably deleted or ended
+        setClassData(undefined);
+        setBarCodeScanned(false);
+        isProcessingScan.current = false;
+        await AsyncStorage.removeItem("currClass");
       }
     } catch (error) {
-      console.log("Error while feching useing useEffect: ", error);
+      console.log("Error while fetching using useEffect: ", error);
+      // On error, reset to scanner so user isn't stuck
+      setClassData(undefined);
+      setBarCodeScanned(false);
+      isProcessingScan.current = false;
     }
   }
+
   useEffect(() => {
     fetchCurrClass();
   }, []);
-
 
 
   // ──── Camera / Scanner View ────
@@ -127,7 +243,7 @@ const GenerateQR = () => {
         <CameraView
           style={StyleSheet.absoluteFillObject}
           facing="back"
-          onBarcodeScanned={onScanned}
+          onBarcodeScanned={barCodeScanned ? undefined : onScanned}
         />
         <Overlay />
 
@@ -206,8 +322,8 @@ const GenerateQR = () => {
         <View className="w-full">
           <Card
             subject={classData.title}
-            maamName={classData.classTeacher?.fullname}
-            time={new Date(classData.endTime).toLocaleTimeString()}
+            maamName={classData.classTeacher?.fullname || classData.classTeacher}
+            time={classData.startTime}
           />
         </View>
 
@@ -216,6 +332,7 @@ const GenerateQR = () => {
           onPress={() => {
             setClassData(undefined);
             setBarCodeScanned(false);
+            isProcessingScan.current = false;
           }}
           className="mt-4 rounded-xl px-6 py-3"
           style={{

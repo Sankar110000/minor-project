@@ -72,31 +72,27 @@ export default function StudentHome() {
       const userString = await AsyncStorage.getItem("user");
       const userData = userString ? JSON.parse(userString) : null;
 
-      // Attempt 1: Fetch with studentID
-      let res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {
-        studentID: userData?._id
-      });
-      
-      let classes = [];
+      // Use getAllClasses to get all classes (works for students)
+      const res = await axios.post(`${BASE_URL}/api/class/getAllClasses`, {});
+
+      let classes: any[] = [];
       if (res.data.success && res.data.classes?.length > 0) {
         classes = res.data.classes;
-      } else {
-        // Attempt 2: Fetch with empty body
-        res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {});
-        if (res.data.success) {
-          classes = res.data.classes || res.data.data || [];
-        }
       }
 
       const todayStr = new Date().toDateString();
       const filtered = classes.filter((c: any) => {
-        const classDate = new Date(c.startTime).toDateString();
-        return classDate === todayStr;
+        const startDate = new Date(c.startTime);
+        // Guard against invalid dates
+        if (isNaN(startDate.getTime())) return false;
+        return startDate.toDateString() === todayStr;
       });
       
       // Map to include presence status
       const withStatus = filtered.map((c: any) => ({
         ...c,
+        // classTeacher may be a populated object or a plain ID string
+        classTeacher: typeof c.classTeacher === "object" ? c.classTeacher : { fullname: "Teacher", _id: c.classTeacher },
         present: c.total_students?.some((s: any) => {
           const sId = typeof s === 'string' ? s : s._id;
           return sId === userData?._id;

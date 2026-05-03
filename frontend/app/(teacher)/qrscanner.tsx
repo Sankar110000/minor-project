@@ -8,8 +8,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 import * as ScreenCapture from "expo-screen-capture";
+import * as Location from "expo-location";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
@@ -50,6 +51,11 @@ export default function RandomQRCode() {
     startTime: string;
     endTime: string;
   } | null>(null);
+  const [teacherLocation, setTeacherLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Anti-proxy: QR expires in 4 seconds (photo-sharing is impossible in this window)
+  const QR_EXPIRY_MS = 4 * 1000;
+  const QR_REFRESH_MS = 2000;
 
   // Theme
   const bgColor = isDark ? "#030712" : "#f8fafc";
@@ -59,6 +65,19 @@ export default function RandomQRCode() {
   const textSub = isDark ? "#9ca3af" : "#6b7280";
   const surfaceBg = isDark ? "#1f2937" : "#f1f5f9";
   const qrBgColor = isDark ? "#1f2937" : "#ffffff";
+
+  // Helper: deduplicate students by _id (backend may push same student multiple times)
+  function deduplicateStudents(classObj: any) {
+    if (!classObj?.total_students) return classObj;
+    const seen = new Set<string>();
+    const unique = classObj.total_students.filter((s: any) => {
+      const id = typeof s === "string" ? s : s._id;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+    return { ...classObj, total_students: unique };
+  }
 
   // 🔹 Generate random QR value (FUNCTIONALITY - UNTOUCHED)
   function generateRandomValue() {
@@ -99,6 +118,7 @@ export default function RandomQRCode() {
       const body = {
         title,
         classTeacher: user?._id,
+        startTime: new Date(),
         endTime: time,
       };
 
@@ -108,11 +128,11 @@ export default function RandomQRCode() {
         setQrValue({
           _id: classInfo._id,
           title: classInfo.title,
-          classTeacher: classInfo.classTeacher,
           startTime: classInfo.startTime,
           endTime: classInfo.endTime,
           token: generateRandomValue(),
-          expiry: Date.now() + 15 * 1000,
+          expiry: Date.now() + QR_EXPIRY_MS,
+          ...(teacherLocation ? { loc: teacherLocation } : {}),
         });
         setIsQrGenerated(true);
         setClassOnGoing(true);
@@ -174,12 +194,18 @@ export default function RandomQRCode() {
         teacherID: user._id,
       });
       if (res.data.success) {
+        const cls = res.data.currClass;
+        console.log("Current Class", cls.startTime.toLocaleTimeString());
         setQrValue({
-          ...res.data.currClass,
+          _id: cls._id,
+          title: cls.title,
+          startTime: cls.startTime,
+          endTime: cls.endTime,
           token: generateRandomValue(),
-          expiry: Date.now() + 15 * 1000,
+          expiry: Date.now() + QR_EXPIRY_MS,
+          ...(teacherLocation ? { loc: teacherLocation } : {}),
         });
-        setCurrClass(res.data.currClass);
+        setCurrClass(deduplicateStudents(cls));
         setClassOnGoing(true);
         setIsQrGenerated(true);
       } else {
@@ -203,7 +229,7 @@ export default function RandomQRCode() {
         teacherID: user._id,
       });
       if (res.data.success) {
-        setCurrClass(res.data.currClass);
+        setCurrClass(deduplicateStudents(res.data.currClass));
       }
     } catch (error) {
       console.log("Error refreshing attendance:", error);
@@ -220,7 +246,27 @@ export default function RandomQRCode() {
     setTitle(e);
   };
 
+  // Capture teacher's GPS location for anti-proxy verification
   useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.High,
+          });
+          setTeacherLocation({
+            lat: loc.coords.latitude,
+            lng: loc.coords.longitude,
+          });
+          console.log("Teacher location captured:", loc.coords.latitude, loc.coords.longitude);
+        } else {
+          console.log("Location permission denied — QR will work without GPS check");
+        }
+      } catch (e) {
+        console.log("Error getting teacher location:", e);
+      }
+    })();
     getData();
   }, []);
 
@@ -229,17 +275,21 @@ export default function RandomQRCode() {
     let attendanceInterval: NodeJS.Timeout;
 
     if (classOnGoing || isQrGenerated) {
-      // Refresh QR token every 2 seconds
+      // Refresh QR token every 2 seconds with 4-second expiry (anti-proxy)
       tokenInterval = setInterval(() => {
         setQrValue((prev) => {
           if (!prev) return prev;
           return {
-            ...prev,
+            _id: (prev as any)._id,
+            title: (prev as any).title,
+            startTime: (prev as any).startTime,
+            endTime: (prev as any).endTime,
             token: generateRandomValue(),
-            expiry: Date.now() + 30 * 1000,
+            expiry: Date.now() + QR_EXPIRY_MS,
+            ...(teacherLocation ? { loc: teacherLocation } : {}),
           };
         });
-      }, 2000);
+      }, QR_REFRESH_MS);
 
       // Refresh attendance data every 5 seconds
       attendanceInterval = setInterval(() => {
@@ -465,18 +515,33 @@ export default function RandomQRCode() {
                 />
               </View>
 
-              <View className="flex-row items-center mt-4">
-                <MaterialCommunityIcons
-                  name="refresh"
-                  size={14}
-                  color={textSub}
-                />
-                <Text
-                  className="text-xs ml-1"
-                  style={{ color: textSub }}
-                >
-                  QR refreshes every 2 seconds
-                </Text>
+              <View className="items-center mt-4 gap-1">
+                <View className="flex-row items-center">
+                  <MaterialCommunityIcons
+                    name="refresh"
+                    size={14}
+                    color={textSub}
+                  />
+                  <Text
+                    className="text-xs ml-1"
+                    style={{ color: textSub }}
+                  >
+                    QR refreshes every 2s • Expires in 4s
+                  </Text>
+                </View>
+                <View className="flex-row items-center">
+                  <MaterialCommunityIcons
+                    name={teacherLocation ? "map-marker-check" : "map-marker-off"}
+                    size={14}
+                    color={teacherLocation ? "#22c55e" : "#ef4444"}
+                  />
+                  <Text
+                    className="text-xs ml-1"
+                    style={{ color: teacherLocation ? "#22c55e" : "#ef4444" }}
+                  >
+                    {teacherLocation ? "GPS Lock Active — Proxy Protected" : "GPS unavailable — location check disabled"}
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -524,7 +589,7 @@ export default function RandomQRCode() {
                 >
                   {currClass.total_students.map((student: any, index: number) => (
                     <View
-                      key={index}
+                      key={student._id || `student-${index}`}
                       className={`flex-row items-center px-4 py-3 ${index < currClass.total_students.length - 1 ? "border-b" : ""
                         }`}
                       style={{ borderBottomColor: borderColor }}

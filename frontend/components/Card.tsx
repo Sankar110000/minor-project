@@ -14,6 +14,8 @@ export const Card = ({ subject, maamName, time, present, title, studentCount }: 
     ? (() => {
         try {
           const date = new Date(time);
+          // Guard against Invalid Date
+          if (isNaN(date.getTime())) return typeof time === "string" ? time : "—";
           return date.toLocaleString("en-US", {
             month: "short",
             day: "numeric",
@@ -21,7 +23,7 @@ export const Card = ({ subject, maamName, time, present, title, studentCount }: 
             minute: "2-digit",
           });
         } catch {
-          return time;
+          return typeof time === "string" ? time : "—";
         }
       })()
     : "—";
@@ -56,6 +58,24 @@ export const Card = ({ subject, maamName, time, present, title, studentCount }: 
               {subject || "Untitled"}
             </Text>
           </View>
+          {/* Status badge */}
+          {title !== undefined && (
+            <View
+              className="px-3 py-1 rounded-full ml-2"
+              style={{
+                backgroundColor: present
+                  ? "rgba(34, 197, 94, 0.12)"
+                  : "rgba(239, 68, 68, 0.12)",
+              }}
+            >
+              <Text
+                className="text-[10px] font-bold"
+                style={{ color: present ? "#22c55e" : "#ef4444" }}
+              >
+                {title}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Details */}
@@ -108,3 +128,4 @@ export const Card = ({ subject, maamName, time, present, title, studentCount }: 
     </View>
   );
 };
+

@@ -27,36 +27,27 @@ export default function AllClass() {
       setUser(userData);
 
       console.log("Fetching classes for student:", userData?._id);
-      
-      // Attempt 1: Fetch using getPrevoiusClass. 
-      // We try passing studentID just in case the backend supports it.
-      let res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {
-        studentID: userData?._id
-      });
-      
-      let classList = [];
+
+      // Use getAllClasses endpoint to get ALL classes (works for students)
+      const res = await axios.post(`${BASE_URL}/api/class/getAllClasses`, {});
+
+      let classList: any[] = [];
       if (res.data.success && res.data.classes?.length > 0) {
         classList = res.data.classes;
-      } else {
-        // Attempt 2: Fetch with empty body (as originally tried)
-        res = await axios.post(`${BASE_URL}/api/class/getPrevoiusClass`, {});
-        if (res.data.success) {
-          classList = res.data.classes || res.data.data || [];
-        }
       }
 
-      console.log("Classes found after attempts:", classList.length);
+      console.log("Total classes found:", classList.length);
 
       const formattedClasses = classList.map((c: any) => {
-        // Check presence
+        // Check if student is present — total_students may be IDs or objects
         const isPresent = c.total_students?.some((s: any) => {
-          const sId = typeof s === 'string' ? s : s._id;
+          const sId = typeof s === "string" ? s : s._id;
           return sId === userData?._id;
         });
 
         return {
           id: c._id,
-          maamName: c.classTeacher?.fullname || "Teacher",
+          maamName: c.classTeacher?.fullname || c.classTeacher || "Teacher",
           subject: c.title || "Untitled Class",
           time: c.startTime,
           present: isPresent,
